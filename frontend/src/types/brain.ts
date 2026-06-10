@@ -6,6 +6,9 @@ export type RegionCategory =
   | 'brainstem'
 
 export type Hemisphere = 'left' | 'right' | 'bilateral' | 'midline'
+export type BrainViewMode = 'surface' | 'deep' | 'both'
+export type CameraPresetId = 'free' | 'left' | 'right' | 'superior' | 'anterior' | 'posterior'
+export type PanelMode = 'learn' | 'quiz'
 
 export interface RegionCitation {
   id: string
@@ -26,4 +29,17 @@ export interface BrainRegion {
   color: string
   position: [number, number, number]
   scale: [number, number, number]
+}
+
+export interface CameraPreset {
+  id: CameraPresetId
+  label: string
+  position: [number, number, number]
+  target: [number, number, number]
+}
+
+export interface QuizFeedback {
+  selectedRegionId: string
+  targetRegionId: string
+  isCorrect: boolean
 }
