@@ -5,12 +5,15 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import { Vector3 } from 'three'
 import { cameraPresets, useBrainStore } from '@/store/brainStore'
 
+// Distance the camera sits in front of the focused target when orbiting freely.
+const FREE_FOCUS_OFFSET = new Vector3(0, 0, 92)
+
 function SceneCamera() {
   const controlsRef = useRef<OrbitControlsImpl>(null)
   const camera = useThree((state) => state.camera)
   const cameraPresetId = useBrainStore((state) => state.cameraPresetId)
   const cameraTarget = useBrainStore((state) => state.cameraTarget)
-  const targetVector = useMemo(() => new Vector3(), [])
+  const selectedTarget = useMemo(() => new Vector3(), [])
   const desiredPosition = useMemo(() => new Vector3(), [])
   const desiredTarget = useMemo(() => new Vector3(), [])
 
@@ -21,16 +24,15 @@ function SceneCamera() {
   }, [cameraPresetId, cameraTarget, desiredPosition, desiredTarget])
 
   useFrame((_, delta) => {
-    const selectedTarget = cameraPresetId === 'free' ? targetVector.fromArray(cameraTarget) : desiredTarget
-    const focusOffset = cameraPresetId === 'free' ? targetVector.fromArray([0, 0, 92]) : desiredPosition
+    const focusTarget = cameraPresetId === 'free' ? selectedTarget.fromArray(cameraTarget) : desiredTarget
     const nextPosition =
-      cameraPresetId === 'free' ? desiredPosition.copy(selectedTarget).add(focusOffset) : desiredPosition
+      cameraPresetId === 'free' ? desiredPosition.copy(focusTarget).add(FREE_FOCUS_OFFSET) : desiredPosition
     const lerpAmount = Math.min(1, delta * 3.6)
 
     camera.position.lerp(nextPosition, lerpAmount)
 
     if (controlsRef.current) {
-      controlsRef.current.target.lerp(selectedTarget, lerpAmount)
+      controlsRef.current.target.lerp(focusTarget, lerpAmount)
       controlsRef.current.update()
     }
   })

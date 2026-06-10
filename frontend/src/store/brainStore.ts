@@ -2,13 +2,15 @@ import { create } from 'zustand'
 import { brainRegions, regionById } from '@/data/regions'
 import type { BrainRegion, BrainViewMode, CameraPreset, CameraPresetId, PanelMode, QuizFeedback } from '@/types/brain'
 
+export const DEFAULT_CAMERA_TARGET: [number, number, number] = [0, -4, -4]
+
 export const cameraPresets: CameraPreset[] = [
-  { id: 'free', label: 'Free', position: [0, 0, 145], target: [0, -4, -4] },
-  { id: 'left', label: 'Left', position: [-145, 0, 10], target: [0, -4, -4] },
-  { id: 'right', label: 'Right', position: [145, 0, 10], target: [0, -4, -4] },
-  { id: 'superior', label: 'Top', position: [0, 145, 20], target: [0, -4, -4] },
-  { id: 'anterior', label: 'Front', position: [0, 38, 145], target: [0, -4, -4] },
-  { id: 'posterior', label: 'Back', position: [0, -120, 96], target: [0, -4, -4] },
+  { id: 'free', label: 'Free', position: [0, 0, 145], target: DEFAULT_CAMERA_TARGET },
+  { id: 'left', label: 'Left', position: [-145, 0, 10], target: DEFAULT_CAMERA_TARGET },
+  { id: 'right', label: 'Right', position: [145, 0, 10], target: DEFAULT_CAMERA_TARGET },
+  { id: 'superior', label: 'Top', position: [0, 145, 20], target: DEFAULT_CAMERA_TARGET },
+  { id: 'anterior', label: 'Front', position: [0, 38, 145], target: DEFAULT_CAMERA_TARGET },
+  { id: 'posterior', label: 'Back', position: [0, -120, 96], target: DEFAULT_CAMERA_TARGET },
 ]
 
 const quizRegionIds = ['hippocampus', 'amygdala', 'thalamus', 'basal-ganglia', 'insula', 'cerebellum']
@@ -44,7 +46,7 @@ export const useBrainStore = create<BrainState>((set) => ({
   searchQuery: '',
   viewMode: 'both',
   cameraPresetId: 'free',
-  cameraTarget: [0, -4, -4],
+  cameraTarget: DEFAULT_CAMERA_TARGET,
   panelMode: 'learn',
   quizTargetRegionId: quizRegionIds[0],
   quizAnsweredCount: 0,
@@ -56,14 +58,17 @@ export const useBrainStore = create<BrainState>((set) => ({
 
       return {
         selectedRegionId,
-        cameraTarget: selectedRegion ? selectedRegion.position : [0, -4, -4],
+        cameraTarget: selectedRegion ? selectedRegion.position : DEFAULT_CAMERA_TARGET,
       }
     }),
   setHoveredRegionId: (hoveredRegionId) => set({ hoveredRegionId }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setViewMode: (viewMode) => set({ viewMode }),
   setCameraPresetId: (cameraPresetId) => set({ cameraPresetId }),
-  setPanelMode: (panelMode) => set({ panelMode }),
+  setPanelMode: (panelMode) =>
+    // Quiz targets span every category, so force the full view to keep them clickable
+    // regardless of the surface/deep filter the user last picked.
+    set(panelMode === 'quiz' ? { panelMode, viewMode: 'both' } : { panelMode }),
   answerQuiz: (selectedRegionId) =>
     set((state) => {
       if (state.quizFeedback) {
@@ -94,7 +99,7 @@ export const useBrainStore = create<BrainState>((set) => ({
         quizTargetRegionId: quizRegionIds[nextIndex],
         quizFeedback: null,
         selectedRegionId: null,
-        cameraTarget: [0, -4, -4],
+        cameraTarget: DEFAULT_CAMERA_TARGET,
       }
     }),
   resetQuiz: () =>
@@ -104,7 +109,7 @@ export const useBrainStore = create<BrainState>((set) => ({
       quizCorrectCount: 0,
       quizFeedback: null,
       selectedRegionId: null,
-      cameraTarget: [0, -4, -4],
+      cameraTarget: DEFAULT_CAMERA_TARGET,
     }),
 }))
 
