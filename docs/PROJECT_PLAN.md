@@ -256,8 +256,8 @@ frontend/src/
     QuizPanel/
     SearchBar/
   data/
-    regions.ts
     citations.ts
+    regions.ts
   store/
     brainStore.ts
   types/
@@ -271,8 +271,6 @@ backend/
       atlases.py
     models/
       region.py
-  data/
-    regions.json
 
 scripts/
   data_pipeline/
@@ -284,6 +282,7 @@ data/
   atlases/
   meshes/
   metadata/
+    regions.json
 ```
 
 ## Immediate Next Sprint

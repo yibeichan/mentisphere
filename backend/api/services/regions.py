@@ -4,7 +4,7 @@ from pathlib import Path
 
 from api.models.region import Region
 
-REGION_DATA_PATH = Path(__file__).resolve().parents[2] / "data" / "regions.json"
+REGION_DATA_PATH = Path(__file__).resolve().parents[3] / "data" / "metadata" / "regions.json"
 
 
 @lru_cache
