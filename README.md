@@ -4,6 +4,8 @@ Interactive 3D brain learning app for exploring brain regions, practicing recall
 
 MentiSphere is currently an early learning-tool prototype. It has a working React/Three.js frontend, a FastAPI backend, shared starter region metadata, search, region details, camera/view controls, and quiz mode. The 3D anatomy is still a simplified educational proxy; real cortical surface and atlas meshes are planned.
 
+![MentiSphere showing hippocampus search and region details](docs/images/mentisphere-preview.png)
+
 ## What Works Today
 
 - Interactive 3D brain-region proxies with hover and selection states.
@@ -14,10 +16,10 @@ MentiSphere is currently an early learning-tool prototype. It has a working Reac
 - Quiz mode for practicing region localization.
 - FastAPI endpoints for region listing, lookup, and search.
 - CI for frontend build/lint/typecheck and backend tests.
+- Browser smoke tests for the main learning flows.
 
 ## Roadmap
 
-- Add browser E2E coverage for the main learning flows.
 - Expand the starter region set and quiz bank.
 - Improve metadata validation and citation quality.
 - Add real surface-brain assets.
@@ -118,6 +120,10 @@ Before bundling detailed atlas assets such as Brainnetome-derived data, verify l
 
 This project is not ready for clinical, diagnostic, or research use. It is a learning-oriented prototype under active development.
 
+## Security
+
+Please report suspected vulnerabilities privately. See [SECURITY.md](SECURITY.md).
+
 ## License
 
-No license file has been added yet. Treat the repository as all rights reserved until a license is explicitly added.
+MIT. See [LICENSE](LICENSE).
