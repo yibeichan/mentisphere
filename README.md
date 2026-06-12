@@ -1,121 +1,123 @@
-# MentiSphere - Interactive 3D Brain Learning
+# MentiSphere
 
-An interactive web application for learning brain anatomy through 3D visualization, region search, and scientifically cited information.
+Interactive 3D brain learning app for exploring brain regions, practicing recall, and reading concise source-backed anatomy notes.
 
-> Current status: early scaffold. The app has a React/Three.js frontend and FastAPI backend, but the brain model, region data, search, and learning workflows are still planned/in progress. See the [project plan](docs/PROJECT_PLAN.md) for the roadmap.
+MentiSphere is currently an early learning-tool prototype. It has a working React/Three.js frontend, a FastAPI backend, shared starter region metadata, search, region details, camera/view controls, and quiz mode. The 3D anatomy is still a simplified educational proxy; real cortical surface and atlas meshes are planned.
 
-## Vision
+## What Works Today
 
-- **Interactive 3D Brain Model**: Explore cortical surface and deep brain structures.
-- **Click-to-Learn**: Click a region to see location, function, related regions, and sources.
-- **Surface Brain Mode**: Learn lobes, gyri, and atlas parcels from lateral/medial views.
-- **Deep Region Mode**: Inspect hippocampus, amygdala, thalamus, basal ganglia, cerebellum, and brainstem.
-- **Search And Quiz**: Find regions by anatomy or function, then practice recall.
-- **Scientific Citations**: Tie educational claims to source references.
+- Interactive 3D brain-region proxies with hover and selection states.
+- Search by region name, anatomy term, or associated function.
+- Region details with summaries, related regions, functions, and citations.
+- Surface/deep/both view filters.
+- Camera presets for common perspectives.
+- Quiz mode for practicing region localization.
+- FastAPI endpoints for region listing, lookup, and search.
+- CI for frontend build/lint/typecheck and backend tests.
 
-## 🚀 Quick Start
+## Roadmap
 
-### Prerequisites
-- Node.js 18+
+- Add browser E2E coverage for the main learning flows.
+- Expand the starter region set and quiz bank.
+- Improve metadata validation and citation quality.
+- Add real surface-brain assets.
+- Add deep-structure meshes from a verified atlas source.
+- Deploy a public preview.
+
+See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the detailed plan.
+
+## Tech Stack
+
+Frontend:
+
+- React 18
+- TypeScript
+- Vite
+- Three.js / React Three Fiber
+- Drei
+- Zustand
+- Tailwind CSS
+
+Backend:
+
+- FastAPI
+- Pydantic
+- Pytest
 - Python 3.12
-- npm or yarn
 
-### Installation
+Data/tooling:
+
+- Shared region metadata in [data/metadata/regions.json](data/metadata/regions.json)
+- Planned neuroimaging pipeline with `nibabel`, `trimesh`, and related scientific Python tools
+
+## Repository Layout
+
+```text
+mentisphere/
+  backend/              FastAPI API and backend tests
+  data/metadata/        Shared starter region metadata
+  docs/                 Planning and architecture notes
+  frontend/             React/Vite frontend
+  scripts/              Future data-pipeline scripts
+```
+
+## Requirements
+
+- Node.js 20 recommended
+- npm
+- Python 3.12
+
+## Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/mentisphere.git
-cd mentisphere
-
-# Install dependencies
 npm install
 python3.12 -m venv .venv312
 .venv312/bin/python -m pip install -r backend/requirements.txt
+```
 
-# Start development servers
+## Development
+
+Start both frontend and backend:
+
+```bash
 npm run dev
 ```
 
-Frontend will be available at http://localhost:3000
-Backend API at http://localhost:8000
+Local URLs:
 
-## 🏗️ Tech Stack
+- Frontend: http://127.0.0.1:3000
+- Backend: http://127.0.0.1:8000
 
-### Frontend
-- React 18 with TypeScript
-- Three.js / React-Three-Fiber for 3D graphics
-- Zustand for state management
-- TailwindCSS for styling
-- Vite for bundling
+Useful commands:
 
-### Backend
-- FastAPI (Python)
-- PostgreSQL (coming soon)
-- Redis for caching (coming soon)
-- Nibabel for neuroimaging data processing
-
-## 📁 Project Structure
-
-```
-mentisphere/
-├── frontend/          # React application
-├── backend/           # FastAPI server
-├── data/             # Brain atlas data and meshes
-└── scripts/          # Data processing utilities
+```bash
+npm run typecheck --workspace=frontend
+npm run lint --workspace=frontend
+npm run build --workspace=frontend
+cd backend && ../.venv312/bin/python -m pytest
 ```
 
-## 🗺️ Plan
+## API
 
-The detailed build plan is in [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md). The immediate sprint is:
+Current endpoints:
 
-1. Fix dependency/dev setup.
-2. Add shared region types and Zustand app state.
-3. Add a small curated starter region dataset.
-4. Connect 3D clicks, search, and the info panel end to end.
-5. Add static FastAPI region/search endpoints.
-6. Replace the placeholder sphere with simple selectable learning regions.
-7. Add typecheck/build/API tests.
+```text
+GET /api/health
+GET /api/regions
+GET /api/regions/{region_id}
+GET /api/search?q=memory
+```
 
-## 🎯 Roadmap
+## Data Notes
 
-### Phase 1 (Current)
-- [x] Basic 3D visualization
-- [x] Project structure
-- [ ] Runnable vertical slice
-- [ ] Shared selection/search state
-- [ ] Static starter region data
-- [ ] Region selection updates info panel
+The current region metadata is a small educational starter set, not a complete anatomical atlas. Functional descriptions are deliberately conservative and should be treated as learning summaries, not medical advice.
 
-### Phase 2
-- [ ] Learning UX and quiz mode
-- [ ] Search functionality
-- [ ] Citation system
-- [ ] Real surface brain assets
+Before bundling detailed atlas assets such as Brainnetome-derived data, verify license and redistribution requirements.
 
-### Phase 3
-- [ ] Deep brain region meshes
-- [ ] Real Brainnetome or comparable atlas data
-- [ ] Multiple atlas support
-- [ ] Advanced visualizations
-- [ ] Performance optimizations
-- [ ] Mobile/tablet support
+## Status
 
-## 📚 Data Sources
+This project is not ready for clinical, diagnostic, or research use. It is a learning-oriented prototype under active development.
 
-- **Brainnetome Atlas**: High-resolution brain parcellation
-- **NeuroNames**: Standardized neuroanatomical nomenclature
-- **Neurosynth**: Meta-analyses of brain function
+## License
 
-## 🤝 Contributing
-
-Contributions are welcome! Please read our contributing guidelines before submitting PRs.
-
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🙏 Acknowledgments
-
-- Brainnetome Center, Chinese Academy of Sciences
-- BrainInfo/NeuroNames project
-- Neurosynth team
+No license file has been added yet. Treat the repository as all rights reserved until a license is explicitly added.
