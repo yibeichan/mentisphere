@@ -86,7 +86,7 @@ Each region should include:
 
 Brainnetome is not in the current plan.
 
-Atlas sources are listed in `pipeline/sources.yaml`. A source is built only after its license is audited, local use is allowed and a checksum is recorded. Atlas files and built meshes stay in a local data folder outside git (`$MENTI_DATA`). See [DATA.md](DATA.md).
+Atlas sources are listed in `pipeline/sources.yaml`. A source will be built only after its license is audited, local use is allowed and a checksum is recorded. Atlas files and built meshes will stay in a local data folder outside git (`$MENTI_DATA`). See [DATA.md](DATA.md).
 
 ## Milestones
 

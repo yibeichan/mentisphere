@@ -98,8 +98,8 @@ jobs:
 
       - name: Test pipeline
         working-directory: pipeline
-        run: uv run pytest -v
+        run: uv run --locked pytest -v
 
       - name: Check source manifest
         working-directory: pipeline
-        run: uv run menti-pipeline check-sources sources.yaml
+        run: uv run --locked menti-pipeline check-sources sources.yaml

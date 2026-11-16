@@ -1,6 +1,6 @@
 # Data
 
-MentiSphere does not ship atlas files, surfaces or meshes. Licensed source files, built meshes, label arrays and your own result files stay on your machine, outside git.
+MentiSphere does not ship atlas files, surfaces or meshes. Licensed source files, built meshes and label arrays live on your machine in `$MENTI_DATA`, outside git. Your own result files stay where they are.
 
 ## The data folder
 
@@ -10,7 +10,7 @@ Set `MENTI_DATA` to a local folder that is not inside a git checkout. The pipeli
 - built meshes and label arrays produced by the pipeline,
 - caches.
 
-Your own result files (parcel tables, CIFTI, GIFTI) are read from the local paths you give. They are never copied into the repository or into this folder.
+Your own result files (parcel tables, CIFTI, GIFTI) will be read from the local paths you give. They are never copied into the repository or into this folder.
 
 ## Source manifest
 
@@ -62,7 +62,7 @@ A `manual` source cannot be downloaded automatically, usually because the provid
 - tracked symbolic links, whatever they point to,
 - files with a data, mesh or archive suffix (for example `.nii`, `.nii.gz`, `.gii`, `.mgz`, `.annot`, `.glb`, `.npy`, `.csv`, `.tsv`, `.gz`, `.zip`, `.bin`, `.pial`), compared case-insensitively against the full suffix, and files whose content starts with gzip or zip bytes under any name,
 - files larger than 1 MB,
-- file names and text that match a leak pattern: participant identifiers (`NDAR`, an optional underscore and eight letters or digits, in any case, not preceded by a letter), and absolute home or cluster paths such as `/home/<user>/`, `/Users/<user>/`, `/scratch/` and `/mnt/`. Text is decoded leniently, so a stray non-UTF-8 byte does not hide a match.
+- file names and text that match a leak pattern: participant identifiers (`NDAR`, an optional underscore and eight letters or digits, in any case, not preceded by a letter), and absolute home or cluster paths such as home directories (`/home/<user>/`, `/Users/<user>/`) and root-level cluster mounts (`orcd`, `scratch`, `net`, `mnt`, `nfs`, `gpfs`, `lustre`). Text is decoded leniently, so a stray non-UTF-8 byte does not hide a match.
 
 Run it locally:
 

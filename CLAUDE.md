@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 MentiSphere is being built as a viewer of real brain anatomy: fsLR 32k and fsaverage cortical surfaces colored by several atlases, and real subcortical meshes. The planned command-line tool, `menti`, resolves region names and coordinates to atlas parcels and produces links and snapshots of exact views. It will overlay the user's own result files, read from local paths. Function information will come only from cited sources.
 
-Licensed atlas files and all user data live in a local folder outside git (`$MENTI_DATA`). See `docs/DATA.md`. The 12 proxy regions in the current frontend are replaced as the plan in `docs/PROJECT_PLAN.md` proceeds.
+Licensed atlas files and built data will live in a local folder outside git (`$MENTI_DATA`). The user's own result files stay where they are and will be read from local paths; they are never copied into the repository or `$MENTI_DATA`. See `docs/DATA.md`. The 12 proxy regions in the current frontend are replaced as the plan in `docs/PROJECT_PLAN.md` proceeds.
 
 ## Development Commands
 
@@ -86,7 +86,7 @@ python -m pytest -v         # Run tests with verbose output
 - Surfaces and atlases: HCP S1200 fsLR 32k, fsaverage, HCP-MMP 1.0, Desikan-Killiany/DKT, Schaefer 2018, Harvard-Oxford, Julich-Brain, Brodmann, Tian S4
 - **NeuroNames**: Standardized nomenclature
 - **Neurosynth**: Function-region associations
-- Every source is listed in `pipeline/sources.yaml` with its license and citation, and is built only after its terms are audited.
+- Every source is listed in `pipeline/sources.yaml` with its license and citation, and will be built only after its terms are audited.
 
 ## Performance Targets
 - Initial load: <3 seconds
