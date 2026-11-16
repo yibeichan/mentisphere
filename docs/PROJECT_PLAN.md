@@ -84,13 +84,9 @@ Each region should include:
 
 ### Atlas Data
 
-Brainnetome is a strong candidate for a later atlas layer because it provides 246 bilateral subregions and connectivity-oriented parcellation. However, the Brainnetome site/NITRC listing describes non-commercial use terms with attribution/share-alike expectations and separate commercial licensing. Before bundling Brainnetome assets in a public app, confirm the intended distribution and license constraints.
+Brainnetome is not in the current plan.
 
-Practical sequence:
-
-1. Educational starter regions with hand-curated metadata and simple meshes.
-2. Surface cortex assets from a permissive or clearly licensed source.
-3. Brainnetome or another detailed atlas as an optional advanced layer.
+Atlas sources are listed in `pipeline/sources.yaml`. A source is built only after its license is audited, local use is allowed and a checksum is recorded. Atlas files and built meshes stay in a local data folder outside git (`$MENTI_DATA`). See [DATA.md](DATA.md).
 
 ## Milestones
 
@@ -164,86 +160,23 @@ Acceptance criteria:
 - The UI works on desktop and tablet-sized screens.
 - No major text overlap or canvas layout breakage.
 
-### Milestone 3: Real Surface Brain
+### Build order
 
-Goal: replace placeholder cortex with anatomically meaningful surface assets.
+Milestones 3 to 6 are replaced by this order of work:
 
-Tasks:
+1. License-gated source manifest, data guard and docs.
+2. Pipeline: fsLR surfaces plus Schaefer 2018, HCP-MMP 1.0 and DKT label arrays. The HCP files need a manual download under the HCP data use terms.
+3. Frontend: a synthetic demo dataset for clones without data, the real surface, an atlas switch and view state in the URL. The 12 proxy regions are removed.
+4. `menti resolve / at / show / serve`, a region catalog with stable IDs such as `hcpmmp1:L_46`, and a first batch of cited aliases (dlPFC, TPJ, and others). Each alias has a citation. Ambiguous terms map to several candidates.
+5. Subcortex: Tian S4, Harvard-Oxford subcortical and FreeSurfer aseg meshes.
+6. `menti snap`: a headless PNG render of a view.
+7. Overlays of local result files (parcel tables, CIFTI, GIFTI), read only from allowlisted local roots.
+8. Function content: meta-analytic term associations and curated notes, each with a citation.
+9. Volume atlases projected to the surface for display (Harvard-Oxford cortical, Julich-Brain, Brodmann), and fsaverage.
 
-- Choose a surface data source and verify license.
-- Convert left/right cortical surfaces to web assets.
-- Add manifest files that map mesh objects or vertex labels to region IDs.
-- Implement surface parcel highlighting.
-- Add cortex transparency and isolate controls.
-- Add mesh loading states and errors.
+Later: live updates of an open browser tab.
 
-Acceptance criteria:
-
-- Left and right cortical surfaces load in the browser.
-- Clicking a visible parcel selects the correct region.
-- App remains interactive on a typical laptop.
-- Surface and metadata IDs are validated by tests/scripts.
-
-### Milestone 4: Deep Brain Structures
-
-Goal: teach subcortical anatomy in context with the cortical surface.
-
-Tasks:
-
-- Convert selected subcortical atlas labels into meshes.
-- Add deep-region layer toggles.
-- Add clipping or cortex opacity controls so deep regions are inspectable.
-- Add labels/tooltips that do not obscure the model.
-
-Acceptance criteria:
-
-- Hippocampus, amygdala, thalamus, basal ganglia, cerebellum, and brainstem are visible/selectable.
-- Learners can isolate one structure or show it in context.
-- Mesh sizes remain reasonable for web loading.
-
-### Milestone 5: Scientific Metadata
-
-Goal: make the content trustworthy and maintainable.
-
-Tasks:
-
-- Define citation schema.
-- Add source fields to every function claim.
-- Add validation script that fails when a region lacks citations.
-- Add source-quality labels:
-  - anatomy reference
-  - review
-  - meta-analysis
-  - atlas documentation
-- Avoid unsupported "region causes function" language.
-
-Acceptance criteria:
-
-- Every displayed function claim links to at least one citation.
-- Metadata validation runs in CI.
-- The app can display uncertainty or caveats where appropriate.
-
-### Milestone 6: Performance And Polish
-
-Goal: make the app feel stable enough for repeated use.
-
-Tasks:
-
-- Add mesh compression and lazy loading.
-- Add loading skeletons for data/model fetches.
-- Add Playwright tests for:
-  - app loads
-  - canvas is nonblank
-  - search selects a region
-  - quiz flow works
-- Add responsive layout for mobile/tablet.
-- Add analytics-free local progress tracking if desired.
-
-Acceptance criteria:
-
-- Initial load target: under 3 seconds on a normal development machine after assets are cached.
-- 3D interaction target: visually smooth during rotate/zoom.
-- Core user paths covered by automated tests.
+The app runs locally. There is no hosted public site in this plan.
 
 ## Suggested File Layout
 
@@ -284,20 +217,6 @@ data/
   metadata/
     regions.json
 ```
-
-## Immediate Next Sprint
-
-Do these first:
-
-1. Fix dependency/dev setup.
-2. Add shared region types and Zustand store.
-3. Add 12 starter regions with citations.
-4. Wire click/search/info panel end to end.
-5. Replace the sphere with simple selectable learning regions.
-6. Add backend static region/search endpoints.
-7. Add basic build/typecheck/API tests.
-
-This produces the first complete learning loop before investing in full atlas conversion.
 
 ## Naming
 
