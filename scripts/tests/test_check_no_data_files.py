@@ -105,3 +105,42 @@ def test_tracked_files_reports_non_utf8_name(tmp_path):
     assert len(names) == 1
     found = find_violations(names, tmp_path, set())
     assert [v.rule for v in found] == ["data-suffix"]
+
+
+def test_rejects_symlink_to_missing_absolute_target(tmp_path):
+    target = os.path.join(os.sep + "nonexistent-" + "target", "atlas.txt")
+    (tmp_path / "link.txt").symlink_to(target)
+    found = find_violations(["link.txt"], tmp_path, set())
+    assert [(v.rule, v.detail) for v in found] == [("symlink", target)]
+
+
+def test_allowlist_cannot_exempt_symlink(tmp_path):
+    (tmp_path / "real.txt").write_text("x")
+    (tmp_path / "link.txt").symlink_to("real.txt")
+    found = find_violations(["link.txt"], tmp_path, {"link.txt"})
+    assert [v.rule for v in found] == ["symlink"]
+
+
+@pytest.mark.parametrize(
+    "name", ["c.tsv.gz", "mesh.bin", "lh.pial", "a.zip", "b.tgz", "x.drc", "v.mnc", "t.trk"]
+)
+def test_rejects_added_data_suffixes(tmp_path, name):
+    rel = write(tmp_path, name)
+    assert [v.rule for v in find_violations([rel], tmp_path, set())] == ["data-suffix"]
+
+
+def test_rejects_gzip_content_under_innocent_name(tmp_path):
+    rel = write(tmp_path, "atlas.nii.gz.txt", b"\x1f\x8b\x08\x00rest")
+    found = find_violations([rel], tmp_path, set())
+    assert [(v.rule, v.detail) for v in found] == [("data-suffix", "compressed content")]
+
+
+def test_rejects_zip_content_under_innocent_name(tmp_path):
+    rel = write(tmp_path, "notes.txt", b"PK\x03\x04rest")
+    found = find_violations([rel], tmp_path, set())
+    assert [(v.rule, v.detail) for v in found] == [("data-suffix", "compressed content")]
+
+
+def test_allowlist_cannot_exempt_compressed_content(tmp_path):
+    rel = write(tmp_path, "notes.txt", b"\x1f\x8b\x08\x00")
+    assert [v.rule for v in find_violations([rel], tmp_path, {rel})] == ["data-suffix"]

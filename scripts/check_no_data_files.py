@@ -2,7 +2,9 @@
 """Reject data files, oversized files and private strings in tracked files.
 
 Stdlib only. Lists tracked files with `git ls-files`, then flags:
-  data-suffix  a data or mesh file extension (never exempted by the allowlist)
+  symlink      a tracked symbolic link (never exempted by the allowlist)
+  data-suffix  a data or mesh file extension, or gzip/zip content under any
+               name (never exempted by the allowlist)
   size         a file larger than MAX_BYTES
   leak         a UTF-8 text file matching LEAK_PATTERNS
 
@@ -11,6 +13,7 @@ Paths listed in scripts/data_guard_allow.txt skip the size and leak checks.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
@@ -22,7 +25,11 @@ DATA_SUFFIXES: tuple[str, ...] = (
     ".nii", ".nii.gz", ".gii", ".mgz", ".mgh", ".annot", ".label", ".glb",
     ".gltf", ".obj", ".ply", ".stl", ".vtk", ".npy", ".npz", ".h5", ".hdf5",
     ".pkl", ".mat", ".tsv", ".csv", ".parquet",
+    ".gz", ".zip", ".tar", ".tgz", ".bz2", ".xz", ".7z", ".bin", ".drc", ".mnc",
+    ".nrrd", ".img", ".hdr", ".tck", ".trk", ".curv", ".sulc", ".thickness",
+    ".pial", ".white", ".inflated", ".sphere", ".ctab",
 )
+COMPRESSED_MAGIC: tuple[bytes, ...] = (b"\x1f\x8b", b"PK\x03\x04")
 MAX_BYTES = 1_000_000
 LEAK_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
     re.compile(p)
@@ -43,21 +50,37 @@ ALLOW_FILE = Path("scripts/data_guard_allow.txt")
 @dataclass(frozen=True)
 class Violation:
     path: str
-    rule: Literal["data-suffix", "size", "leak"]
+    rule: Literal["symlink", "data-suffix", "size", "leak"]
     detail: str
+
+
+def _has_compressed_magic(file: Path) -> bool:
+    try:
+        with open(file, "rb") as f:
+            head = f.read(4)
+    except OSError:
+        return False
+    return head.startswith(COMPRESSED_MAGIC)
 
 
 def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[Violation]:
     found: list[Violation] = []
     for rel in paths:
+        file = root / rel
+        if file.is_symlink():
+            found.append(Violation(rel, "symlink", os.readlink(file)))
+            continue
         lower = rel.lower()
+        suffix_hit = False
         for suffix in DATA_SUFFIXES:
             if lower.endswith(suffix):
                 found.append(Violation(rel, "data-suffix", f"data file extension {suffix}"))
+                suffix_hit = True
                 break
+        if not suffix_hit and _has_compressed_magic(file):
+            found.append(Violation(rel, "data-suffix", "compressed content"))
         if rel in allow:
             continue
-        file = root / rel
         try:
             size = file.stat().st_size
         except OSError:
