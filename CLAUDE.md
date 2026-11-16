@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-MentiSphere is a viewer of real brain anatomy: fsLR 32k and fsaverage cortical surfaces colored by several atlases, and real subcortical meshes. A command-line tool, `menti`, resolves region names and coordinates to atlas parcels and produces links and snapshots of exact views. It can overlay the user's own result files, read from local paths. Function information comes only from cited sources.
+MentiSphere is being built as a viewer of real brain anatomy: fsLR 32k and fsaverage cortical surfaces colored by several atlases, and real subcortical meshes. The planned command-line tool, `menti`, resolves region names and coordinates to atlas parcels and produces links and snapshots of exact views. It will overlay the user's own result files, read from local paths. Function information will come only from cited sources.
 
 Licensed atlas files and all user data live in a local folder outside git (`$MENTI_DATA`). See `docs/DATA.md`. The 12 proxy regions in the current frontend are replaced as the plan in `docs/PROJECT_PLAN.md` proceeds.
 

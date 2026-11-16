@@ -4,7 +4,7 @@ MentiSphere does not ship atlas files, surfaces or meshes. Licensed source files
 
 ## The data folder
 
-Set `MENTI_DATA` to a local folder that is not inside a git checkout. It holds:
+Set `MENTI_DATA` to a local folder that is not inside a git checkout. The pipeline stages that use it are not implemented yet; today only the manifest check below exists. The folder is planned to hold:
 
 - downloaded source files (surfaces, atlases, templates),
 - built meshes and label arrays produced by the pipeline,
@@ -31,28 +31,29 @@ Your own result files (parcel tables, CIFTI, GIFTI) are read from the local path
 | `citation.text`, `citation.doi` | How to cite the source. |
 | `acquisition` | How to obtain the file, `fetch` or `manual` (below). |
 
-Check the manifest with:
+Check the manifest from `pipeline/`:
 
 ```bash
-menti-pipeline check-sources
-menti-pipeline check-sources path/to/sources.yaml
+uv run menti-pipeline check-sources sources.yaml
 ```
+
+`check-sources` validates the file and reports each source as buildable or not, with the reason.
 
 ## When a source is built
 
-The pipeline builds a source only when all three hold:
+The pipeline will build a source only when all three hold:
 
 1. the license is audited (`license.audited` is set),
 2. `license.local_use` is `true`,
 3. a `sha256` checksum is recorded in `acquisition`.
 
-Otherwise the build stops with a message naming the missing condition.
+Otherwise the build will stop with a message naming the missing condition.
 
 ## Fetch and manual sources
 
-A `fetch` source has a `url` and a `sha256`. The pipeline downloads the file into `$MENTI_DATA` and verifies the checksum.
+A `fetch` source has a `url` and a `sha256`. The pipeline will download the file and verify the checksum. Download and verification are not implemented yet.
 
-A `manual` source cannot be downloaded automatically, usually because the provider requires you to accept data use terms first. Its entry has an `instructions_url`, the expected `filename` and a `sha256`. Download the file from the instructions page, accept the terms, and place it in the sources folder inside `$MENTI_DATA` under exactly that filename. The pipeline verifies the checksum before using it.
+A `manual` source cannot be downloaded automatically, usually because the provider requires you to accept data use terms first. Its entry has an `instructions_url`, the expected `filename` and a `sha256`. Download the file from the instructions page, accept the terms, and keep it under exactly that filename. The pipeline will verify the checksum before using it. Where to place the file will be set when the download stage is implemented.
 
 ## What the data guard rejects
 

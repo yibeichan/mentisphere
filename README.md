@@ -82,7 +82,7 @@ python3.12 -m venv .venv312
 .venv312/bin/python -m pip install -r backend/requirements.txt
 ```
 
-To build atlas data, set `MENTI_DATA` to a local folder outside the repository (see [docs/DATA.md](docs/DATA.md)).
+To build atlas data, set `MENTI_DATA` to a local folder outside the repository (see [docs/DATA.md](docs/DATA.md)). The pipeline stages that use it are not implemented yet.
 
 ## Development
 
