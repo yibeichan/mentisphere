@@ -279,7 +279,7 @@ sources:
   - key: tpl-mni152nlin6asym
     kind: template
     name: "MNI152NLin6Asym template (TemplateFlow)"
-    version: "TemplateFlow 1.0.0"
+    version: "unversioned (TemplateFlow)"
     space: "MNI152NLin6Asym"
     license:
       name: "Unconfirmed (template_description.json: \"See LICENSE file\")"
@@ -299,7 +299,7 @@ sources:
   - key: tpl-mni152nlin2009casym
     kind: template
     name: "MNI152NLin2009cAsym template (TemplateFlow)"
-    version: "TemplateFlow"
+    version: "unversioned (TemplateFlow)"
     space: "MNI152NLin2009cAsym"
     license:
       name: "McConnell Brain Imaging Centre permissive notice"

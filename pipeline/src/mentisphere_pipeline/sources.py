@@ -18,6 +18,7 @@ from pydantic import (
     ConfigDict,
     Field,
     HttpUrl,
+    StrictBool,
     UrlConstraints,
     ValidationError,
     field_validator,
@@ -50,11 +51,18 @@ class _Model(BaseModel):
 class License(_Model):
     name: str
     url: HttpsUrl
-    local_use: bool | None
-    copy_between_own_machines: bool | None
-    redistribute: bool | None
+    local_use: StrictBool | None
+    copy_between_own_machines: StrictBool | None
+    redistribute: StrictBool | None
     attribution: str
     audited: date | None
+
+    @field_validator("audited")
+    @classmethod
+    def _plausible_audit_date(cls, value: date | None) -> date | None:
+        if value is not None and not date(2000, 1, 1) <= value <= date.today():
+            raise ValueError("audited must be between 2000-01-01 and today")
+        return value
 
 
 def _check_sha256(value: str | None) -> str | None:

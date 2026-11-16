@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 from pathlib import Path
 
 import pytest
@@ -131,6 +132,31 @@ def test_http_acquisition_url_rejected(tmp_path):
     sha256: {SHA}"""
     with pytest.raises(SourceError):
         load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+@pytest.mark.parametrize("value", ['"yes"', "1", '"true"', "0"])
+def test_non_boolean_local_use_rejected(tmp_path, value):
+    with pytest.raises(SourceError):
+        load_sources(write(tmp_path, source_yaml(local_use=value)))
+
+
+@pytest.mark.parametrize(
+    "audited",
+    [
+        "1999-12-31",
+        "1970-01-01",
+        (date.today() + timedelta(days=1)).isoformat(),
+    ],
+)
+def test_implausible_audit_date_rejected(tmp_path, audited):
+    with pytest.raises(SourceError, match="audited"):
+        load_sources(write(tmp_path, source_yaml(audited=audited)))
+
+
+@pytest.mark.parametrize("audited", ["2000-01-01", date.today().isoformat()])
+def test_boundary_audit_dates_accepted(tmp_path, audited):
+    (src,) = load_sources(write(tmp_path, source_yaml(audited=audited)))
+    assert src.license.audited == date.fromisoformat(audited)
 
 
 def test_unaudited_not_buildable(tmp_path):
