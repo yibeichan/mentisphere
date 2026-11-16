@@ -7,7 +7,7 @@ and the checksum of its file is recorded.
 from __future__ import annotations
 
 import re
-from datetime import date
+from datetime import date, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Literal
@@ -60,8 +60,8 @@ class License(_Model):
     @field_validator("audited")
     @classmethod
     def _plausible_audit_date(cls, value: date | None) -> date | None:
-        if value is not None and not date(2000, 1, 1) <= value <= date.today():
-            raise ValueError("audited must be between 2000-01-01 and today")
+        if value is not None and not date(2000, 1, 1) <= value <= date.today() + timedelta(days=1):
+            raise ValueError("audited must be between 2000-01-01 and tomorrow (time zones)")
         return value
 
 

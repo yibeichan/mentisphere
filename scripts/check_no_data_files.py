@@ -68,7 +68,7 @@ def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[V
     for rel in paths:
         file = root / rel
         if file.is_symlink():
-            found.append(Violation(rel, "symlink", os.readlink(file)))
+            found.append(Violation(rel, "symlink", "tracked symbolic link"))
             continue
         lower = rel.lower()
         suffix_hit = False

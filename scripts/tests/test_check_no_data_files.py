@@ -150,7 +150,7 @@ def test_rejects_symlink_to_missing_absolute_target(tmp_path):
     target = os.path.join(os.sep + "nonexistent-" + "target", "atlas.txt")
     (tmp_path / "link.txt").symlink_to(target)
     found = find_violations(["link.txt"], tmp_path, set())
-    assert [(v.rule, v.detail) for v in found] == [("symlink", target)]
+    assert [(v.rule, v.detail) for v in found] == [("symlink", "tracked symbolic link")]
 
 
 def test_allowlist_cannot_exempt_symlink(tmp_path):

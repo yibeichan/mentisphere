@@ -145,7 +145,7 @@ def test_non_boolean_local_use_rejected(tmp_path, value):
     [
         "1999-12-31",
         "1970-01-01",
-        (date.today() + timedelta(days=1)).isoformat(),
+        (date.today() + timedelta(days=2)).isoformat(),
     ],
 )
 def test_implausible_audit_date_rejected(tmp_path, audited):
@@ -153,7 +153,10 @@ def test_implausible_audit_date_rejected(tmp_path, audited):
         load_sources(write(tmp_path, source_yaml(audited=audited)))
 
 
-@pytest.mark.parametrize("audited", ["2000-01-01", date.today().isoformat()])
+@pytest.mark.parametrize(
+    "audited",
+    ["2000-01-01", date.today().isoformat(), (date.today() + timedelta(days=1)).isoformat()],
+)
 def test_boundary_audit_dates_accepted(tmp_path, audited):
     (src,) = load_sources(write(tmp_path, source_yaml(audited=audited)))
     assert src.license.audited == date.fromisoformat(audited)

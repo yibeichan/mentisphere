@@ -1,6 +1,6 @@
 # Data
 
-MentiSphere does not ship atlas files, surfaces or meshes. Licensed source files, built meshes and label arrays live on your machine in `$MENTI_DATA`, outside git. Your own result files stay where they are.
+MentiSphere does not ship atlas files, surfaces or meshes. Licensed source files, built meshes and label arrays will live on your machine in `$MENTI_DATA`, outside git. Your own result files stay where they are.
 
 ## The data folder
 
