@@ -2,7 +2,6 @@
 # A source builds only when its license is audited, local_use is true and sha256 is set.
 # See docs/DATA.md.
 sources:
-  # DOI to verify
   - key: fslr-hcp-s1200
     kind: surface
     name: "HCP S1200 group-average fsLR 32k surfaces"
@@ -45,7 +44,6 @@ sources:
       instructions_url: https://balsa.wustl.edu/study/show/RVVG
       filename: "Q1-Q6_RelatedValidation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii"
       sha256: null
-  # DOI to verify
   - key: fsaverage
     kind: surface
     name: "FreeSurfer fsaverage surfaces"
@@ -67,7 +65,6 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage"
       sha256: null
-  # DOI to gather
   - key: dk
     kind: atlas
     name: "Desikan-Killiany (FreeSurfer aparc)"
@@ -83,7 +80,7 @@ sources:
       audited: 2026-11-16
     citation:
       text: "Desikan RS et al. (2006) An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest. NeuroImage 31:968-980"
-      doi: null
+      doi: "10.1016/j.neuroimage.2006.01.021"
     acquisition:
       mode: manual
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
@@ -110,7 +107,6 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage/label/lh.aparc.DKTatlas.annot"
       sha256: null
-  # DOI to gather
   - key: aseg-fsaverage
     kind: atlas
     name: "FreeSurfer aseg subcortical segmentation (fsaverage)"
@@ -126,13 +122,12 @@ sources:
       audited: 2026-11-16
     citation:
       text: "Fischl B et al. (2002) Whole brain segmentation. Neuron 33:341-355"
-      doi: null
+      doi: "10.1016/s0896-6273(02)00569-x"
     acquisition:
       mode: manual
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage/mri/aseg.mgz"
       sha256: null
-  # DOI to gather
   - key: brodmann-fs-ba
     kind: atlas
     name: "FreeSurfer Brodmann area labels (BA_exvivo, partial coverage)"
@@ -148,13 +143,12 @@ sources:
       audited: 2026-11-16
     citation:
       text: "Fischl B et al. (2008) Cortical folding patterns and predicting cytoarchitecture. Cereb Cortex 18:1973-1980"
-      doi: null
+      doi: "10.1093/cercor/bhm225"
     acquisition:
       mode: manual
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/BrodmannAreaMaps
       filename: "subjects/fsaverage/label/lh.BA44_exvivo.label"
       sha256: null
-  # DOI to gather
   - key: brodmann-mricron-nii
     kind: atlas
     name: "MRIcron Brodmann area template"
@@ -170,13 +164,13 @@ sources:
       audited: null
     citation:
       text: "Rorden C, Brett M (2000) Stereotaxic display of brain lesions. Behav Neurol 12:191-200"
-      doi: null
+      doi: "10.1155/2000/421719"
     acquisition:
       mode: manual
       instructions_url: https://people.cas.sc.edu/rorden/mricro/template.html
       filename: "brodmann.nii.gz"
       sha256: null
-  # DOI to gather
+  # several papers; see citation text
   - key: ho-cort
     kind: atlas
     name: "Harvard-Oxford cortical atlas (FSL)"
@@ -198,7 +192,7 @@ sources:
       instructions_url: https://fsl.fmrib.ox.ac.uk/fsl/docs/other/datasets.html
       filename: "data/atlases/HarvardOxford/HarvardOxford-cort-maxprob-thr25-1mm.nii.gz"
       sha256: null
-  # DOI to gather
+  # several papers; see citation text
   - key: ho-sub
     kind: atlas
     name: "Harvard-Oxford subcortical atlas (FSL)"
@@ -242,7 +236,6 @@ sources:
       instructions_url: https://julich-brain-atlas.de/atlas
       filename: "julich-brain-v3.1-maps.nii.gz"
       sha256: null
-  # DOI to verify
   - key: schaefer2018
     kind: atlas
     name: "Schaefer 2018 Local-Global parcellation"
@@ -263,7 +256,6 @@ sources:
       mode: fetch
       url: https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/HCP/fslr32k/cifti/Schaefer2018_400Parcels_17Networks_order.dlabel.nii
       sha256: null
-  # DOI to verify
   - key: tians4
     kind: atlas
     name: "Melbourne Subcortex Atlas (Tian 2020), scale IV"
@@ -324,7 +316,6 @@ sources:
       mode: fetch
       url: https://templateflow.s3.amazonaws.com/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-01_T1w.nii.gz
       sha256: null
-  # DOI to verify
   - key: neurosynth
     kind: decoding
     name: "Neurosynth database"
@@ -345,7 +336,6 @@ sources:
       mode: fetch
       url: https://raw.githubusercontent.com/neurosynth/neurosynth-data/master/data-neurosynth_version-7_coordinates.tsv.gz
       sha256: null
-  # DOI to verify; fetch url is the repo page, direct file url to confirm
   - key: neuroquery
     kind: decoding
     name: "NeuroQuery data and model"
@@ -364,5 +354,5 @@ sources:
       doi: "10.7554/eLife.53385"
     acquisition:
       mode: fetch
-      url: https://github.com/neuroquery/neuroquery_data
+      url: https://github.com/neuroquery/neuroquery_data/raw/main/neuroquery_model.zip
       sha256: null
