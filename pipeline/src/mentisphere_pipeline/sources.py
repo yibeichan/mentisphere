@@ -102,15 +102,32 @@ class _UniqueKeyLoader(yaml.SafeLoader):
     """SafeLoader that rejects a repeated key in a mapping."""
 
 
+def _entry_key(node: yaml.MappingNode) -> str | None:
+    """Return the value of a literal `key:` scalar in a mapping node, if any."""
+    for key_node, value_node in node.value:
+        if (
+            isinstance(key_node, yaml.ScalarNode)
+            and key_node.value == "key"
+            and isinstance(value_node, yaml.ScalarNode)
+        ):
+            return value_node.value
+    return None
+
+
 def _construct_unique_mapping(loader: _UniqueKeyLoader, node: yaml.MappingNode):
     loader.flatten_mapping(node)
     seen: set = set()
     for key_node, _ in node.value:
         key = loader.construct_object(key_node, deep=True)
-        if key in seen:
-            raise SourceError(
-                f"duplicate mapping key {key!r} (line {key_node.start_mark.line + 1})"
-            )
+        line = key_node.start_mark.line + 1
+        try:
+            repeated = key in seen
+        except TypeError:
+            raise SourceError(f"unhashable mapping key (line {line})") from None
+        if repeated:
+            where = _entry_key(node)
+            entry = f" in source {where}" if where else ""
+            raise SourceError(f"duplicate mapping key {key!r}{entry} (line {line})")
         seen.add(key)
     return loader.construct_mapping(node, deep=True)
 
@@ -122,12 +139,19 @@ _UniqueKeyLoader.add_constructor(
 
 def load_sources(path: Path) -> list[Source]:
     """Parse and validate a manifest; raise SourceError on any problem."""
+    name = Path(path).name
     try:
-        data = yaml.load(Path(path).read_text(encoding="utf-8"), Loader=_UniqueKeyLoader)
+        text = Path(path).read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        raise SourceError(f"{name}: not valid UTF-8") from None
+    try:
+        data = yaml.load(text, Loader=_UniqueKeyLoader)
+    except SourceError as exc:
+        raise SourceError(f"{name}: {exc}") from None
     except yaml.YAMLError as exc:
-        raise SourceError(f"{path}: invalid YAML: {exc}") from exc
+        raise SourceError(f"{name}: invalid YAML: {exc}") from exc
     if not isinstance(data, dict) or not isinstance(data.get("sources"), list):
-        raise SourceError(f"{path}: top level must be a mapping with a 'sources' list")
+        raise SourceError(f"{name}: top level must be a mapping with a 'sources' list")
 
     sources: list[Source] = []
     seen: set[str] = set()

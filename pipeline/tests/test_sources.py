@@ -84,8 +84,27 @@ def test_valid_fetch_source_loads(tmp_path):
 
 def test_duplicate_yaml_mapping_key_rejected(tmp_path):
     path = write(tmp_path, source_yaml(extra_name="    name: Again\n"))
+    with pytest.raises(SourceError) as info:
+        load_sources(path)
+    message = str(info.value)
+    assert "sources.yaml" in message
+    assert "dkt" in message
+    assert str(tmp_path) not in message
+
+
+def test_unhashable_mapping_key_rejected(tmp_path):
+    path = tmp_path / "sources.yaml"
+    path.write_text("sources:\n  - ? [a, b]\n    : 1\n", encoding="utf-8")
     with pytest.raises(SourceError):
         load_sources(path)
+
+
+def test_non_utf8_manifest_rejected(tmp_path, capsys):
+    path = tmp_path / "sources.yaml"
+    path.write_bytes(b"sources:\n  - name: \xff\xfe\n")
+    with pytest.raises(SourceError):
+        load_sources(path)
+    assert main(["check-sources", str(path)]) == 1
 
 
 def test_duplicate_source_key_rejected(tmp_path):
@@ -160,6 +179,16 @@ def test_uppercase_sha256_rejected(tmp_path):
     sha256: "{'A' * 64}\""""
     with pytest.raises(SourceError):
         load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+def test_audited_manual_source_with_sha256_buildable(tmp_path):
+    acq = f"""
+    mode: manual
+    instructions_url: https://example.org/how
+    filename: file.nii.gz
+    sha256: {SHA}"""
+    (src,) = load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+    assert_buildable(src)
 
 
 def test_fully_audited_source_buildable(tmp_path):
