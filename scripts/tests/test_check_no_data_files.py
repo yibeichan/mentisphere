@@ -1,6 +1,9 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -60,6 +63,18 @@ def test_detects_ndar_id_and_abs_paths(tmp_path):
     assert [v.rule for v in found] == ["leak", "leak"]
 
 
+def test_detects_home_and_users_paths(tmp_path):
+    home = write(tmp_path, "h.txt", ("/hom" + "e/alice/data").encode())
+    users = write(tmp_path, "u.txt", ("/User" + "s/Alice/data").encode())
+    found = find_violations([home, users], tmp_path, set())
+    assert [(v.path, v.rule) for v in found] == [(home, "leak"), (users, "leak")]
+
+
+def test_file_of_exactly_max_bytes_is_accepted(tmp_path):
+    rel = write(tmp_path, "mesh", b"a" * MAX_BYTES)
+    assert find_violations([rel], tmp_path, set()) == []
+
+
 def test_binary_file_not_leak_scanned(tmp_path):
     rel = write(tmp_path, "blob", b"\xff\xfe\x00NDAR" + b"AB123456")
     assert [v for v in find_violations([rel], tmp_path, set()) if v.rule == "leak"] == []
@@ -75,3 +90,18 @@ def test_tracked_files_handles_spaces(tmp_path):
 def test_current_repo_is_clean(capsys):
     assert main([]) == 0
     assert capsys.readouterr().out == ""
+
+
+def test_tracked_files_reports_non_utf8_name(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    raw = b"x\xff.nii"
+    try:
+        with open(os.path.join(os.fsencode(tmp_path), raw), "wb") as f:
+            f.write(b"x")
+    except OSError:
+        pytest.skip("filesystem refuses non-UTF-8 names")
+    subprocess.run(["git", "add", "--", os.fsdecode(raw)], cwd=tmp_path, check=True)
+    names = tracked_files(tmp_path)
+    assert len(names) == 1
+    found = find_violations(names, tmp_path, set())
+    assert [v.rule for v in found] == ["data-suffix"]

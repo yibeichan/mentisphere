@@ -82,7 +82,7 @@ def tracked_files(root: Path) -> list[str]:
         ["git", "-C", str(root), "ls-files", "-z"],
         check=True, capture_output=True,
     ).stdout
-    return [p.decode("utf-8") for p in out.split(b"\0") if p]
+    return [p.decode("utf-8", errors="surrogateescape") for p in out.split(b"\0") if p]
 
 
 def load_allow(root: Path) -> set[str]:
