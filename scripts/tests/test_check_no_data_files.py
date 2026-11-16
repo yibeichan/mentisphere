@@ -57,10 +57,44 @@ def test_allowlist_cannot_exempt_data_extension(tmp_path):
 
 
 def test_detects_ndar_id_and_abs_paths(tmp_path):
-    text = "id " + "NDAR" + "AB123456" + " at " + "/orc" + "d/x\n"
+    text = "id " + "NDAR" + "AB123456" + " at " + "/mn" + "t/x\n"
     rel = write(tmp_path, "notes.txt", text.encode())
     found = find_violations([rel], tmp_path, set())
     assert [v.rule for v in found] == ["leak", "leak"]
+
+
+@pytest.mark.parametrize("prefix", ["orcd", "scratch", "net", "mnt", "nfs", "gpfs", "lustre"])
+def test_detects_generic_cluster_paths(tmp_path, prefix):
+    rel = write(tmp_path, "c.txt", ("see /" + prefix + "/proj/x").encode())
+    assert [v.rule for v in find_violations([rel], tmp_path, set())] == ["leak"]
+
+
+def test_relative_and_url_paths_are_not_cluster_leaks(tmp_path):
+    text = "docs/net/x and https://example.org/mnt/x and ./scratch/ and ~/net/y"
+    rel = write(tmp_path, "ok.txt", text.encode())
+    assert find_violations([rel], tmp_path, set()) == []
+
+
+def test_detects_ndar_id_with_underscore(tmp_path):
+    rel = write(tmp_path, "n.txt", ("NDAR" + "_INV" + "AB1CD").encode())
+    assert [v.rule for v in find_violations([rel], tmp_path, set())] == ["leak"]
+
+
+def test_detects_lowercase_ndar_id(tmp_path):
+    rel = write(tmp_path, "n.txt", ("ndar" + "inv12345").encode())
+    assert [v.rule for v in find_violations([rel], tmp_path, set())] == ["leak"]
+
+
+def test_detects_ndar_id_in_path(tmp_path):
+    rel = write(tmp_path, "data/sub-" + "NDAR" + "_INV12345" + ".txt", b"clean")
+    found = find_violations([rel], tmp_path, set())
+    assert [(v.rule, "in path" in v.detail) for v in found] == [("leak", True)]
+
+
+def test_detects_home_path_in_path(tmp_path):
+    rel = write(tmp_path, "sub/ho" + "me/alice/" + "x.txt", b"clean")
+    found = find_violations([rel], tmp_path, set())
+    assert [(v.rule, "in path" in v.detail) for v in found] == [("leak", True)]
 
 
 def test_detects_home_and_users_paths(tmp_path):
@@ -75,9 +109,14 @@ def test_file_of_exactly_max_bytes_is_accepted(tmp_path):
     assert find_violations([rel], tmp_path, set()) == []
 
 
-def test_binary_file_not_leak_scanned(tmp_path):
-    rel = write(tmp_path, "blob", b"\xff\xfe\x00NDAR" + b"AB123456")
-    assert [v for v in find_violations([rel], tmp_path, set()) if v.rule == "leak"] == []
+def test_non_utf8_file_is_still_leak_scanned(tmp_path):
+    rel = write(tmp_path, "blob", b"\xff\xfe\x00" + b"NDAR" + b"AB123456")
+    assert [v.rule for v in find_violations([rel], tmp_path, set())] == ["leak"]
+
+
+def test_binary_file_without_patterns_is_clean(tmp_path):
+    rel = write(tmp_path, "blob", bytes(range(256)) * 4)
+    assert find_violations([rel], tmp_path, set()) == []
 
 
 def test_tracked_files_handles_spaces(tmp_path):
@@ -144,3 +183,8 @@ def test_rejects_zip_content_under_innocent_name(tmp_path):
 def test_allowlist_cannot_exempt_compressed_content(tmp_path):
     rel = write(tmp_path, "notes.txt", b"\x1f\x8b\x08\x00")
     assert [v.rule for v in find_violations([rel], tmp_path, {rel})] == ["data-suffix"]
+
+
+def test_word_containing_ndar_is_not_an_id(tmp_path):
+    rel = write(tmp_path, "w.tsx", b"<meshStandardMaterial />")
+    assert find_violations([rel], tmp_path, set()) == []

@@ -59,9 +59,10 @@ A `manual` source cannot be downloaded automatically, usually because the provid
 
 `scripts/check_no_data_files.py` runs in CI and checks every tracked file. It rejects:
 
-- files with a data or mesh suffix (for example `.nii`, `.nii.gz`, `.gii`, `.mgz`, `.annot`, `.glb`, `.npy`, `.csv`, `.tsv`), compared case-insensitively against the full suffix,
+- tracked symbolic links, whatever they point to,
+- files with a data, mesh or archive suffix (for example `.nii`, `.nii.gz`, `.gii`, `.mgz`, `.annot`, `.glb`, `.npy`, `.csv`, `.tsv`, `.gz`, `.zip`, `.bin`, `.pial`), compared case-insensitively against the full suffix, and files whose content starts with gzip or zip bytes under any name,
 - files larger than 1 MB,
-- text that matches a leak pattern: participant identifiers of the form `NDAR` plus eight characters, and absolute home or cluster paths.
+- file names and text that match a leak pattern: participant identifiers (`NDAR`, an optional underscore and eight letters or digits, in any case, not preceded by a letter), and absolute home or cluster paths such as `/home/<user>/`, `/Users/<user>/`, `/scratch/` and `/mnt/`. Text is decoded leniently, so a stray non-UTF-8 byte does not hide a match.
 
 Run it locally:
 
@@ -69,4 +70,4 @@ Run it locally:
 python3.12 scripts/check_no_data_files.py
 ```
 
-`scripts/data_guard_allow.txt` lists repo-relative paths that skip the size and leak checks. It cannot exempt a file from the data-suffix check. Keep real data in `$MENTI_DATA`.
+`scripts/data_guard_allow.txt` lists repo-relative paths that skip the size and leak checks. It cannot exempt a file from the symlink or data-suffix checks. Keep real data in `$MENTI_DATA`.

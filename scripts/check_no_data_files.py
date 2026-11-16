@@ -6,7 +6,7 @@ Stdlib only. Lists tracked files with `git ls-files`, then flags:
   data-suffix  a data or mesh file extension, or gzip/zip content under any
                name (never exempted by the allowlist)
   size         a file larger than MAX_BYTES
-  leak         a UTF-8 text file matching LEAK_PATTERNS
+  leak         a path or file content (decoded leniently) matching LEAK_PATTERNS
 
 Paths listed in scripts/data_guard_allow.txt skip the size and leak checks.
 """
@@ -32,12 +32,12 @@ DATA_SUFFIXES: tuple[str, ...] = (
 COMPRESSED_MAGIC: tuple[bytes, ...] = (b"\x1f\x8b", b"PK\x03\x04")
 MAX_BYTES = 1_000_000
 LEAK_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
-    re.compile(p)
-    for p in (
-        r"NDAR[A-Z0-9]{8}",
-        r"/orcd/",
-        r"/home/[a-z][a-z0-9_-]*/",
-        r"/Users/[A-Za-z][^/]*/",
+    re.compile(p, flags)
+    for p, flags in (
+        (r"(?<![A-Za-z])NDAR_?[A-Z0-9]{8}", re.IGNORECASE),
+        (r"(?<![\w.~-])/(?:orcd|scratch|net|mnt|nfs|gpfs|lustre)/", 0),
+        (r"/home/[a-z][a-z0-9_-]*/", 0),
+        (r"/Users/[A-Za-z][^/]*/", 0),
     )
 )
 # These files contain the patterns themselves.
@@ -81,6 +81,9 @@ def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[V
             found.append(Violation(rel, "data-suffix", "compressed content"))
         if rel in allow:
             continue
+        for pattern in LEAK_PATTERNS:
+            if pattern.search(rel):
+                found.append(Violation(rel, "leak", f"matches {pattern.pattern} in path"))
         try:
             size = file.stat().st_size
         except OSError:
@@ -91,8 +94,8 @@ def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[V
         if rel in SELF_EXCLUDED or not file.is_file():
             continue
         try:
-            text = file.read_bytes().decode("utf-8")
-        except (OSError, UnicodeDecodeError):
+            text = file.read_bytes().decode("utf-8", errors="replace")
+        except OSError:
             continue
         for pattern in LEAK_PATTERNS:
             if pattern.search(text):
