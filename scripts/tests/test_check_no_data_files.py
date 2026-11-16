@@ -1,0 +1,77 @@
+import subprocess
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from check_no_data_files import MAX_BYTES, find_violations, main, tracked_files  # noqa: E402
+
+
+def write(root: Path, rel: str, content: bytes = b"x") -> str:
+    p = root / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_bytes(content)
+    return rel
+
+
+def test_rejects_nii_gz(tmp_path):
+    rel = write(tmp_path, "data/x.nii.gz")
+    found = find_violations([rel], tmp_path, set())
+    assert len(found) == 1
+    assert found[0].path == rel and found[0].rule == "data-suffix"
+
+
+def test_rejects_uppercase_and_compound_extensions(tmp_path):
+    rels = [write(tmp_path, n) for n in ("A.NII.GZ", "sub.dlabel.nii", "lh.func.gii")]
+    found = find_violations(rels, tmp_path, set())
+    assert [v.rule for v in found] == ["data-suffix"] * 3
+
+
+def test_accepts_ordinary_source_files(tmp_path):
+    rels = [
+        write(tmp_path, "README.md", b"hello"),
+        write(tmp_path, "frontend/src/App.tsx", b"export {}"),
+        write(tmp_path, "docs/images/x.png", b"\x89PNG\x00\x01"),
+    ]
+    assert find_violations(rels, tmp_path, set()) == []
+
+
+def test_rejects_large_file_without_extension(tmp_path):
+    rel = write(tmp_path, "mesh", b"a" * (MAX_BYTES + 1))
+    found = find_violations([rel], tmp_path, set())
+    assert [v.rule for v in found] == ["size"]
+
+
+def test_allowlist_exempts_size(tmp_path):
+    rel = write(tmp_path, "mesh", b"a" * (MAX_BYTES + 1))
+    assert find_violations([rel], tmp_path, {rel}) == []
+
+
+def test_allowlist_cannot_exempt_data_extension(tmp_path):
+    rel = write(tmp_path, "x.nii.gz")
+    found = find_violations([rel], tmp_path, {rel})
+    assert [v.rule for v in found] == ["data-suffix"]
+
+
+def test_detects_ndar_id_and_abs_paths(tmp_path):
+    text = "id " + "NDAR" + "AB123456" + " at " + "/orc" + "d/x\n"
+    rel = write(tmp_path, "notes.txt", text.encode())
+    found = find_violations([rel], tmp_path, set())
+    assert [v.rule for v in found] == ["leak", "leak"]
+
+
+def test_binary_file_not_leak_scanned(tmp_path):
+    rel = write(tmp_path, "blob", b"\xff\xfe\x00NDAR" + b"AB123456")
+    assert [v for v in find_violations([rel], tmp_path, set()) if v.rule == "leak"] == []
+
+
+def test_tracked_files_handles_spaces(tmp_path):
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    (tmp_path / "a b.txt").write_text("x")
+    subprocess.run(["git", "add", "a b.txt"], cwd=tmp_path, check=True)
+    assert tracked_files(tmp_path) == ["a b.txt"]
+
+
+def test_current_repo_is_clean(capsys):
+    assert main([]) == 0
+    assert capsys.readouterr().out == ""

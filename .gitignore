@@ -57,6 +57,14 @@ data/meshes/*.gltf
 data/meshes/*.glb
 data/embeddings/*.pkl
 data/embeddings/*.npy
+menti-data/
+.menti-data/
+*.dtseries.nii
+*.dscalar.nii
+*.dlabel.nii
+*.gii
+*.mgz
+*.annot
 
 # Temporary files
 *.tmp
