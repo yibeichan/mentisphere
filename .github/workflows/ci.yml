@@ -20,7 +20,11 @@ concurrency:
 jobs:
   frontend:
     name: Frontend
-    runs-on: ubuntu-latest
+    # Playwright 1.60.x cannot install Chromium on Ubuntu 26.04 (ubuntu-latest).
+    # Drop this pin once @playwright/test is at 1.61 or later.
+    runs-on: ubuntu-24.04
+    # The Playwright step runs apt, which can stall; fail fast instead of waiting for the 6 h default.
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
