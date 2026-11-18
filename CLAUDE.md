@@ -3,7 +3,9 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-MentiSphere is a 3D brain visualization platform for exploring neuroanatomy through interactive 3D models, with scientifically cited information about brain regions.
+MentiSphere is being built as a viewer of real brain anatomy: fsLR 32k and fsaverage cortical surfaces colored by several atlases, and real subcortical meshes. The planned command-line tool, `menti`, resolves region names and coordinates to atlas parcels and produces links and snapshots of exact views. It will overlay the user's own result files, read from local paths. Function information will come only from cited sources.
+
+Licensed atlas files and built data will live in a local folder outside git (`$MENTI_DATA`). The user's own result files stay where they are and will be read from local paths; they are never copied into the repository or `$MENTI_DATA`. See `docs/DATA.md`. The 12 proxy regions in the current frontend are replaced as the plan in `docs/PROJECT_PLAN.md` proceeds.
 
 ## Development Commands
 
@@ -68,21 +70,22 @@ python -m pytest -v         # Run tests with verbose output
 5. Info panel showing region details
 
 ### Phase 2
-1. Real brain mesh from Brainnetome Atlas
-2. Individual region meshes with proper colors
-3. Database integration (PostgreSQL)
-4. Semantic search with embeddings
+1. License-gated source manifest and data guard
+2. Real fsLR surfaces with Schaefer 2018, HCP-MMP 1.0 and DKT labels
+3. Frontend on the real surface with atlas switch and view state in the URL
+4. `menti resolve / at / show / serve` with a region catalog and cited aliases
 
 ### Phase 3
-1. Multiple atlas support
-2. Performance optimizations (LOD, instancing)
-3. Advanced search filters
-4. Citation management system
+1. Subcortical meshes (Tian S4, Harvard-Oxford, FreeSurfer aseg)
+2. `menti snap` (headless PNG of a view)
+3. Overlays of local result files (parcel tables, CIFTI, GIFTI)
+4. Cited function content
+5. Volume atlases projected to the surface, and fsaverage
 
 ## Data Sources
-- **Brainnetome Atlas**: Primary brain parcellation (246 regions)
-- **NeuroNames**: Standardized nomenclature
+- Surfaces and atlases: HCP S1200 fsLR 32k, fsaverage, HCP-MMP 1.0, Desikan-Killiany/DKT, Schaefer 2018, Harvard-Oxford, Julich-Brain, Brodmann, Tian S4
 - **Neurosynth**: Function-region associations
+- Every source is listed in `pipeline/sources.yaml` with its license and citation, and will be built only when its license is audited, local use is allowed and a checksum is recorded.
 
 ## Performance Targets
 - Initial load: <3 seconds
@@ -116,9 +119,10 @@ GET /api/atlases          # List available atlases
 ✅ Frontend setup with React + Three.js
 ✅ Backend setup with FastAPI
 ✅ Basic 3D viewer component (placeholder sphere)
-⏳ Brain mesh data processing pipeline
-⏳ API implementation
-⏳ State management setup
+✅ License-gated source manifest and data guard (CI)
+⏳ Real surface pipeline and label arrays
+⏳ `menti` CLI
+⏳ Overlays, function content
 
 ---
 
@@ -138,7 +142,7 @@ This section maintains a living record of important decisions, implementations, 
 - **Chose React-Three-Fiber over vanilla Three.js**: Better React integration and declarative 3D scene management
 - **Monorepo with npm workspaces**: Simplified dependency management between frontend/backend
 - **Start with static JSON before database**: Faster MVP iteration, easier testing
-- **Single atlas (Brainnetome) first**: Reduced complexity for initial implementation
+- **Single atlas (Brainnetome) first** (superseded): Reduced complexity for initial implementation
 - **Vite over Create React App**: Faster builds and better TypeScript support
 
 #### Challenges & Solutions

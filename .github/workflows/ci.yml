@@ -82,3 +82,28 @@ jobs:
       - name: Test API
         working-directory: backend
         run: python -m pytest
+
+  guard:
+    name: Data guard and source manifest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10.3.0
+
+      - name: Check tracked files for data and leaks
+        run: uv run --python 3.12 scripts/check_no_data_files.py
+
+      - name: Test data guard
+        run: uv run --python 3.12 --with pytest pytest scripts/tests -v
+
+      - name: Test pipeline
+        working-directory: pipeline
+        run: uv run --locked pytest -v
+
+      - name: Check source manifest
+        working-directory: pipeline
+        run: uv run --locked menti-pipeline check-sources sources.yaml

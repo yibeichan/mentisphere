@@ -1,0 +1,2 @@
+# Repo-relative paths exempt from the size and leak checks, one per line.
+# Data file extensions cannot be exempted.

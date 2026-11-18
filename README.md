@@ -20,11 +20,15 @@ MentiSphere is currently an early learning-tool prototype. It has a working Reac
 
 ## Roadmap
 
-- Expand the starter region set and quiz bank.
-- Improve metadata validation and citation quality.
-- Add real surface-brain assets.
-- Add deep-structure meshes from a verified atlas source.
-- Deploy a public preview.
+The 12 proxy regions are the current state and are to be replaced by real anatomy:
+
+- Real fsLR 32k and fsaverage cortical surfaces, colored by an atlas: HCP-MMP 1.0, Desikan-Killiany (DK/DKT), Harvard-Oxford, Julich-Brain, Brodmann and Schaefer 2018.
+- Real subcortical meshes, including the Tian S4 subcortical atlas.
+- A command-line tool, `menti`, with `resolve`, `at`, `show`, `snap` and `serve`: it resolves region names and coordinates to atlas parcels and produces links and snapshots of exact views.
+- Overlays of your own result files, read from local paths.
+- Function information only from cited sources.
+
+Licensed atlas files and built data will live in a local folder outside git (`$MENTI_DATA`); your own result files stay where they are and are never copied. See [docs/DATA.md](docs/DATA.md).
 
 See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the detailed plan.
 
@@ -50,7 +54,7 @@ Backend:
 Data/tooling:
 
 - Shared region metadata in [data/metadata/regions.json](data/metadata/regions.json)
-- Planned neuroimaging pipeline with `nibabel`, `trimesh`, and related scientific Python tools
+- Data pipeline in [pipeline/](pipeline/) with a license-gated source manifest (`pipeline/sources.yaml`)
 
 ## Repository Layout
 
@@ -58,9 +62,10 @@ Data/tooling:
 mentisphere/
   backend/              FastAPI API and backend tests
   data/metadata/        Shared starter region metadata
-  docs/                 Planning and architecture notes
+  docs/                 Planning, architecture and data notes
   frontend/             React/Vite frontend
-  scripts/              Future data-pipeline scripts
+  pipeline/             Source manifest and data pipeline
+  scripts/              Repository checks (data guard)
 ```
 
 ## Requirements
@@ -76,6 +81,8 @@ npm install
 python3.12 -m venv .venv312
 .venv312/bin/python -m pip install -r backend/requirements.txt
 ```
+
+To build atlas data, set `MENTI_DATA` to a local folder outside the repository (see [docs/DATA.md](docs/DATA.md)). The pipeline stages that use it are not implemented yet.
 
 ## Development
 
@@ -114,7 +121,7 @@ GET /api/search?q=memory
 
 The current region metadata is a small educational starter set, not a complete anatomical atlas. Functional descriptions are deliberately conservative and should be treated as learning summaries, not medical advice.
 
-Before bundling detailed atlas assets such as Brainnetome-derived data, verify license and redistribution requirements.
+Atlas assets are not bundled. Each source has a license entry in `pipeline/sources.yaml`, and a source will be used only when its license is audited, local use is allowed and a checksum is recorded. Downloaded files and built meshes will live in `$MENTI_DATA`, outside git. See [docs/DATA.md](docs/DATA.md).
 
 ## Status
 

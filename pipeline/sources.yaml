@@ -1,0 +1,363 @@
+# Manifest of external data sources (surfaces, atlases, templates, decoding data).
+# A source builds only when its license is audited, local_use is true and sha256 is set.
+# See docs/DATA.md.
+sources:
+  - key: fslr-hcp-s1200
+    kind: surface
+    name: "HCP S1200 group-average fsLR 32k surfaces"
+    version: "S1200 GroupAvg v1"
+    space: "fsLR-32k"
+    license:
+      name: "WU-Minn HCP Open Access Data Use Terms"
+      url: https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
+      local_use: true
+      copy_between_own_machines: null
+      redistribute: true
+      attribution: "Acknowledge WU-Minn HCP data per Data Use Term 5"
+      audited: 2026-11-16
+    citation:
+      text: "Van Essen DC et al. (2013) The WU-Minn Human Connectome Project: an overview. NeuroImage 80:62-79"
+      doi: "10.1016/j.neuroimage.2013.05.041"
+    acquisition:
+      mode: manual
+      instructions_url: https://humanconnectome.org/study/hcp-young-adult/article/s1200-group-average-data-release
+      filename: "HCP_S1200_GroupAvg_v1.zip"
+      sha256: null
+  - key: hcpmmp1
+    kind: atlas
+    name: "HCP-MMP 1.0 (Glasser 2016)"
+    version: "1.0"
+    space: "fsLR-32k"
+    license:
+      name: "WU-Minn HCP Open Access Data Use Terms"
+      url: https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
+      local_use: true
+      copy_between_own_machines: null
+      redistribute: true
+      attribution: "Acknowledge WU-Minn HCP data; cite Glasser 2016"
+      audited: 2026-11-16
+    citation:
+      text: "Glasser MF et al. (2016) A multi-modal parcellation of human cerebral cortex. Nature 536:171-178"
+      doi: "10.1038/nature18933"
+    acquisition:
+      mode: manual
+      instructions_url: https://balsa.wustl.edu/study/show/RVVG
+      filename: "Q1-Q6_RelatedValidation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii"
+      sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
+  - key: fsaverage
+    kind: surface
+    name: "FreeSurfer fsaverage surfaces"
+    version: "FreeSurfer 7"
+    space: "fsaverage"
+    license:
+      name: "FreeSurfer Software License"
+      url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Include the FreeSurfer license text with copies"
+      audited: 2026-11-16
+    citation:
+      text: "Fischl B (2012) FreeSurfer. NeuroImage 62:774-781"
+      doi: "10.1016/j.neuroimage.2012.01.021"
+    acquisition:
+      mode: manual
+      instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
+      filename: "subjects/fsaverage"
+      sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
+  - key: dk
+    kind: atlas
+    name: "Desikan-Killiany (FreeSurfer aparc)"
+    version: "FreeSurfer 7"
+    space: "fsaverage"
+    license:
+      name: "FreeSurfer Software License"
+      url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Include the FreeSurfer license text; cite Desikan 2006"
+      audited: 2026-11-16
+    citation:
+      text: "Desikan RS et al. (2006) An automated labeling system for subdividing the human cerebral cortex on MRI scans into gyral based regions of interest. NeuroImage 31:968-980"
+      doi: "10.1016/j.neuroimage.2006.01.021"
+    acquisition:
+      mode: manual
+      instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
+      filename: "subjects/fsaverage/label/lh.aparc.annot"
+      sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
+  - key: dkt
+    kind: atlas
+    name: "Desikan-Killiany-Tourville DKT40 (FreeSurfer)"
+    version: "FreeSurfer 7"
+    space: "fsaverage"
+    license:
+      name: "FreeSurfer Software License"
+      url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Include the FreeSurfer license text; cite Klein and Tourville 2012"
+      audited: 2026-11-16
+    citation:
+      text: "Klein A, Tourville J (2012) 101 labeled brain images and a consistent human cortical labeling protocol. Front Neurosci 6:171"
+      doi: "10.3389/fnins.2012.00171"
+    acquisition:
+      mode: manual
+      instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
+      filename: "subjects/fsaverage/label/lh.aparc.DKTatlas.annot"
+      sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
+  - key: aseg-fsaverage
+    kind: atlas
+    name: "FreeSurfer aseg subcortical segmentation (fsaverage)"
+    version: "FreeSurfer 7"
+    space: null
+    license:
+      name: "FreeSurfer Software License"
+      url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Include the FreeSurfer license text"
+      audited: 2026-11-16
+    citation:
+      text: "Fischl B et al. (2002) Whole brain segmentation. Neuron 33:341-355"
+      doi: "10.1016/s0896-6273(02)00569-x"
+    acquisition:
+      mode: manual
+      instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
+      filename: "subjects/fsaverage/mri/aseg.mgz"
+      sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
+  - key: brodmann-fs-ba
+    kind: atlas
+    name: "FreeSurfer Brodmann area labels (BA_exvivo, partial coverage)"
+    version: "FreeSurfer 7"
+    space: "fsaverage"
+    license:
+      name: "FreeSurfer Software License"
+      url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: null
+      attribution: "Include the FreeSurfer license text; wiki notes no commercial use"
+      audited: 2026-11-16
+    citation:
+      text: "Fischl B et al. (2008) Cortical folding patterns and predicting cytoarchitecture. Cereb Cortex 18:1973-1980"
+      doi: "10.1093/cercor/bhm225"
+    acquisition:
+      mode: manual
+      instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/BrodmannAreaMaps
+      filename: "subjects/fsaverage/label/lh.BA44_exvivo.label"
+      sha256: null
+  - key: brodmann-mricron-nii
+    kind: atlas
+    name: "MRIcron Brodmann area template"
+    version: "unversioned"
+    space: null
+    license:
+      name: "No license found"
+      url: https://people.cas.sc.edu/rorden/mricro/template.html
+      local_use: null
+      copy_between_own_machines: null
+      redistribute: null
+      attribution: "Unknown"
+      audited: null
+    citation:
+      text: "Rorden C, Brett M (2000) Stereotaxic display of brain lesions. Behav Neurol 12:191-200"
+      doi: "10.1155/2000/421719"
+    acquisition:
+      mode: manual
+      instructions_url: https://people.cas.sc.edu/rorden/mricro/template.html
+      filename: "brodmann.nii.gz"
+      sha256: null
+  # several papers; see citation text
+  - key: ho-cort
+    kind: atlas
+    name: "Harvard-Oxford cortical atlas (FSL)"
+    version: "FSL 6"
+    space: "MNI152NLin6Asym"
+    license:
+      name: "CC BY-SA 4.0"
+      url: https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "CC BY-SA 4.0; credit the Harvard Center for Morphometric Analysis"
+      audited: 2026-11-16
+    citation:
+      text: "Desikan RS et al. (2006) NeuroImage 31:968-980; Makris N et al. (2006) Schizophr Res; Frazier JA et al. (2005) Am J Psychiatry; Goldstein JM et al. (2007) Biol Psychiatry"
+      doi: null
+    acquisition:
+      mode: manual
+      instructions_url: https://fsl.fmrib.ox.ac.uk/fsl/docs/other/datasets.html
+      filename: "data/atlases/HarvardOxford/HarvardOxford-cort-maxprob-thr25-1mm.nii.gz"
+      sha256: null
+  # several papers; see citation text
+  - key: ho-sub
+    kind: atlas
+    name: "Harvard-Oxford subcortical atlas (FSL)"
+    version: "FSL 6"
+    space: "MNI152NLin6Asym"
+    license:
+      name: "CC BY-SA 4.0"
+      url: https://fsl.fmrib.ox.ac.uk/fsl/docs/license.html
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "CC BY-SA 4.0; credit the Harvard Center for Morphometric Analysis"
+      audited: 2026-11-16
+    citation:
+      text: "Desikan RS et al. (2006) NeuroImage 31:968-980; Makris N et al. (2006) Schizophr Res; Frazier JA et al. (2005) Am J Psychiatry; Goldstein JM et al. (2007) Biol Psychiatry"
+      doi: null
+    acquisition:
+      mode: manual
+      instructions_url: https://fsl.fmrib.ox.ac.uk/fsl/docs/other/datasets.html
+      filename: "data/atlases/HarvardOxford/HarvardOxford-sub-maxprob-thr25-1mm.nii.gz"
+      sha256: null
+  # filename to confirm
+  - key: julich3
+    kind: atlas
+    name: "Julich-Brain cytoarchitectonic maps"
+    version: "3.1"
+    space: null
+    license:
+      name: "CC BY-NC-SA 4.0"
+      url: https://creativecommons.org/licenses/by-nc-sa/4.0/
+      local_use: null
+      copy_between_own_machines: null
+      redistribute: null
+      attribution: "Cite the dataset and Amunts 2020"
+      audited: null
+    citation:
+      text: "Amunts K, Mohlberg H, Bludau S, Zilles K (2020) Julich-Brain: a 3D probabilistic atlas of the human brain's cytoarchitecture. Science 369:988-992"
+      doi: "10.1126/science.abb4588"
+    acquisition:
+      mode: manual
+      instructions_url: https://julich-brain-atlas.de/atlas
+      filename: "julich-brain-v3.1-maps.nii.gz"
+      sha256: null
+  - key: schaefer2018
+    kind: atlas
+    name: "Schaefer 2018 Local-Global parcellation"
+    version: "unversioned"
+    space: "fsLR-32k"
+    license:
+      name: "MIT"
+      url: https://github.com/ThomasYeoLab/CBIG/blob/master/LICENSE.md
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Keep the CBIG copyright and permission notice"
+      audited: 2026-11-16
+    citation:
+      text: "Schaefer A et al. (2018) Local-Global parcellation of the human cerebral cortex from intrinsic functional connectivity MRI. Cereb Cortex 28:3095-3114"
+      doi: "10.1093/cercor/bhx179"
+    acquisition:
+      mode: fetch
+      url: https://raw.githubusercontent.com/ThomasYeoLab/CBIG/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/HCP/fslr32k/cifti/Schaefer2018_400Parcels_17Networks_order.dlabel.nii
+      sha256: null
+  - key: tians4
+    kind: atlas
+    name: "Melbourne Subcortex Atlas (Tian 2020), scale IV"
+    version: "unversioned"
+    space: "MNI152NLin6Asym"
+    license:
+      name: "Melbourne Subcortex Atlas license (MIT-style)"
+      url: https://github.com/yetianmed/subcortex/blob/master/license.txt
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Cite Tian et al. 2020 in any publication"
+      audited: 2026-11-16
+    citation:
+      text: "Tian Y, Margulies DS, Breakspear M, Zalesky A (2020) Topographic organization of the human subcortex unveiled with functional connectivity gradients. Nat Neurosci 23:1421-1432"
+      doi: "10.1038/s41593-020-00711-6"
+    acquisition:
+      mode: fetch
+      url: https://raw.githubusercontent.com/yetianmed/subcortex/master/Group-Parcellation/3T/Subcortex-Only/Tian_Subcortex_S4_3T.nii
+      sha256: null
+  - key: tpl-mni152nlin6asym
+    kind: template
+    name: "MNI152NLin6Asym template (TemplateFlow)"
+    version: "unversioned (TemplateFlow)"
+    space: "MNI152NLin6Asym"
+    license:
+      name: "Unconfirmed (template_description.json: \"See LICENSE file\")"
+      url: https://github.com/templateflow/tpl-MNI152NLin6Asym
+      local_use: null
+      copy_between_own_machines: null
+      redistribute: null
+      attribution: "Cite TemplateFlow and Janke et al."
+      audited: null
+    citation:
+      text: "Ciric R et al. (2022) TemplateFlow: FAIR-sharing of multi-scale, multi-species brain models. Nat Methods 19:1568-1571"
+      doi: "10.1038/s41592-022-01681-2"
+    acquisition:
+      mode: fetch
+      url: https://templateflow.s3.amazonaws.com/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-01_T1w.nii.gz
+      sha256: null
+  - key: tpl-mni152nlin2009casym
+    kind: template
+    name: "MNI152NLin2009cAsym template (TemplateFlow)"
+    version: "unversioned (TemplateFlow)"
+    space: "MNI152NLin2009cAsym"
+    license:
+      name: "McConnell Brain Imaging Centre permissive notice"
+      url: https://github.com/templateflow/tpl-MNI152NLin2009cAsym/blob/master/LICENSE
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Keep the copyright notice in all copies; cite Fonov 2011 and TemplateFlow"
+      audited: 2026-11-16
+    citation:
+      text: "Fonov V et al. (2011) Unbiased average age-appropriate atlases for pediatric studies. NeuroImage 54:313-327"
+      doi: "10.1016/j.neuroimage.2010.07.033"
+    acquisition:
+      mode: fetch
+      url: https://templateflow.s3.amazonaws.com/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-01_T1w.nii.gz
+      sha256: null
+  - key: neurosynth
+    kind: decoding
+    name: "Neurosynth database"
+    version: "7"
+    space: null
+    license:
+      name: "ODbL 1.0"
+      url: https://opendatacommons.org/licenses/odbl/1-0/
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Attribute public use; share derivative databases under ODbL"
+      audited: 2026-11-16
+    citation:
+      text: "Yarkoni T et al. (2011) Large-scale automated synthesis of human functional neuroimaging data. Nat Methods 8:665-670"
+      doi: "10.1038/nmeth.1635"
+    acquisition:
+      mode: fetch
+      url: https://raw.githubusercontent.com/neurosynth/neurosynth-data/master/data-neurosynth_version-7_coordinates.tsv.gz
+      sha256: null
+  - key: neuroquery
+    kind: decoding
+    name: "NeuroQuery data and model"
+    version: "unversioned"
+    space: null
+    license:
+      name: "BSD-3-Clause"
+      url: https://github.com/neuroquery/neuroquery_data/blob/master/LICENSE
+      local_use: true
+      copy_between_own_machines: true
+      redistribute: true
+      attribution: "Keep the copyright notice"
+      audited: 2026-11-16
+    citation:
+      text: "Dockès J et al. (2020) NeuroQuery, comprehensive meta-analysis of human brain mapping. eLife 9:e53385"
+      doi: "10.7554/eLife.53385"
+    acquisition:
+      mode: fetch
+      url: https://github.com/neuroquery/neuroquery_data/raw/main/neuroquery_model.zip
+      sha256: null
