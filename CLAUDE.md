@@ -84,9 +84,8 @@ python -m pytest -v         # Run tests with verbose output
 
 ## Data Sources
 - Surfaces and atlases: HCP S1200 fsLR 32k, fsaverage, HCP-MMP 1.0, Desikan-Killiany/DKT, Schaefer 2018, Harvard-Oxford, Julich-Brain, Brodmann, Tian S4
-- **NeuroNames**: Standardized nomenclature
 - **Neurosynth**: Function-region associations
-- Every source is listed in `pipeline/sources.yaml` with its license and citation, and will be built only after its terms are audited.
+- Every source is listed in `pipeline/sources.yaml` with its license and citation, and will be built only when its license is audited, local use is allowed and a checksum is recorded.
 
 ## Performance Targets
 - Initial load: <3 seconds

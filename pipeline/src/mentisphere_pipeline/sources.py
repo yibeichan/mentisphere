@@ -18,15 +18,20 @@ from pydantic import (
     ConfigDict,
     Field,
     HttpUrl,
+    Strict,
     StrictBool,
+    StringConstraints,
     UrlConstraints,
     ValidationError,
     field_validator,
 )
 
 HttpsUrl = Annotated[HttpUrl, UrlConstraints(allowed_schemes=["https"])]
+# A string with at least one non-space character.
+Text = Annotated[str, StringConstraints(pattern=r"\S")]
+Doi = Annotated[str, StringConstraints(pattern=r"^10\.\d{4,9}/\S+$")]
 
-_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
 
 
 class SourceError(ValueError):
@@ -49,13 +54,14 @@ class _Model(BaseModel):
 
 
 class License(_Model):
-    name: str
+    name: Text
     url: HttpsUrl
     local_use: StrictBool | None
     copy_between_own_machines: StrictBool | None
     redistribute: StrictBool | None
-    attribution: str
-    audited: date | None
+    attribution: Text
+    # Strict: only an unquoted YAML date (2026-11-16), not a string, number or datetime.
+    audited: Annotated[date, Strict()] | None
 
     @field_validator("audited")
     @classmethod
@@ -66,7 +72,7 @@ class License(_Model):
 
 
 def _check_sha256(value: str | None) -> str | None:
-    if value is not None and not _SHA256_RE.match(value):
+    if value is not None and not _SHA256_RE.fullmatch(value):
         raise ValueError("sha256 must be 64 lowercase hex characters")
     return value
 
@@ -87,17 +93,25 @@ class ManualAcquisition(_Model):
 
     _sha = field_validator("sha256")(_check_sha256)
 
+    @field_validator("filename")
+    @classmethod
+    def _relative_filename(cls, value: str) -> str:
+        # An absolute path has an empty first part, so it is rejected too.
+        if "\\" in value or any(part in ("", ".", "..") for part in value.split("/")):
+            raise ValueError("filename must be a relative path with no empty, '.' or '..' parts")
+        return value
+
 
 class Citation(_Model):
-    text: str
-    doi: str | None
+    text: Text
+    doi: Doi | None
 
 
 class Source(_Model):
     key: str = Field(pattern=r"^[a-z0-9][a-z0-9-]*$")
     kind: Literal["surface", "atlas", "template", "decoding"]
-    name: str
-    version: str
+    name: Text
+    version: Text
     space: Space | None
     license: License
     citation: Citation
@@ -107,7 +121,19 @@ class Source(_Model):
 
 
 class _UniqueKeyLoader(yaml.SafeLoader):
-    """SafeLoader that rejects a repeated key in a mapping."""
+    """SafeLoader that rejects a repeated key and reads only true/false as booleans."""
+
+
+# YAML 1.1 also reads yes/no/on/off as booleans; keep those as strings so the
+# strict boolean fields reject them.
+_BOOL_TAG = "tag:yaml.org,2002:bool"
+_UniqueKeyLoader.yaml_implicit_resolvers = {
+    first: [(tag, regexp) for tag, regexp in resolvers if tag != _BOOL_TAG]
+    for first, resolvers in yaml.SafeLoader.yaml_implicit_resolvers.items()
+}
+_UniqueKeyLoader.add_implicit_resolver(
+    _BOOL_TAG, re.compile(r"^(?:true|false)$"), list("tf")
+)
 
 
 def _entry_key(node: yaml.MappingNode) -> str | None:
@@ -158,8 +184,15 @@ def load_sources(path: Path) -> list[Source]:
         raise SourceError(f"{name}: {exc}") from None
     except yaml.YAMLError as exc:
         raise SourceError(f"{name}: invalid YAML: {exc}") from exc
-    if not isinstance(data, dict) or not isinstance(data.get("sources"), list):
-        raise SourceError(f"{name}: top level must be a mapping with a 'sources' list")
+    if (
+        not isinstance(data, dict)
+        or set(data) != {"sources"}
+        or not isinstance(data["sources"], list)
+        or not data["sources"]
+    ):
+        raise SourceError(
+            f"{name}: top level must be a mapping with only a non-empty 'sources' list"
+        )
 
     sources: list[Source] = []
     seen: set[str] = set()
@@ -176,12 +209,27 @@ def load_sources(path: Path) -> list[Source]:
     return sources
 
 
+def missing_conditions(source: Source) -> list[str]:
+    """Return every unmet build condition; an empty list means buildable.
+
+    Only `audited`, `local_use` and the checksum are checked. The
+    `copy_between_own_machines` and `redistribute` flags are recorded for
+    people and are not part of the gate.
+    """
+    missing = []
+    if source.license.audited is None:
+        missing.append("license not audited")
+    if source.license.local_use is not True:
+        missing.append("local use not allowed or unclear")
+    sha = source.acquisition.sha256
+    # Checked again here because a Source can be built or copied without validation.
+    if sha is None or not _SHA256_RE.fullmatch(sha):
+        missing.append("no sha256 checksum")
+    return missing
+
+
 def assert_buildable(source: Source) -> None:
     """Raise NotBuildable unless the license gate and checksum are satisfied."""
-    if source.license.audited is None:
-        raise NotBuildable("license not audited")
-    if source.license.local_use is not True:
-        raise NotBuildable("local use not allowed or unclear")
-    sha = source.acquisition.sha256
-    if sha is None or not _SHA256_RE.match(sha):
-        raise NotBuildable("no sha256 checksum")
+    missing = missing_conditions(source)
+    if missing:
+        raise NotBuildable("; ".join(missing))

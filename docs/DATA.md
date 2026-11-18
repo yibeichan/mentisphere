@@ -23,9 +23,9 @@ Your own result files (parcel tables, CIFTI, GIFTI) will be read from the local 
 | `name`, `version` | Full name and release. |
 | `space` | Coordinate space of the data, for example `fsLR-32k`. |
 | `license.name`, `license.url` | License or data use terms. |
-| `license.local_use` | `true` if the terms allow using the files locally. `null` means not decided. |
-| `license.copy_between_own_machines` | Whether you may copy the files between your own machines. |
-| `license.redistribute` | Whether the files may be redistributed. |
+| `license.local_use` | `true` if the terms allow using the files locally, `false` if they do not, `null` if not decided. |
+| `license.copy_between_own_machines` | Whether you may copy the files between your own machines. Recorded for you; the build does not check it. |
+| `license.redistribute` | Whether the files may be redistributed. Recorded for you; the build does not check it. |
 | `license.attribution` | Required acknowledgement text. |
 | `license.audited` | Date the terms were read and recorded. `null` means not audited. |
 | `citation.text`, `citation.doi` | How to cite the source. |
@@ -37,7 +37,7 @@ Check the manifest from `pipeline/`:
 uv run menti-pipeline check-sources sources.yaml
 ```
 
-`check-sources` validates the file and reports each source as buildable or not, with the reason.
+`check-sources` validates the file and reports each source as `buildable` or `not buildable`, followed by every missing condition.
 
 ## When a source is built
 
@@ -47,13 +47,15 @@ The pipeline will build a source only when all three hold:
 2. `license.local_use` is `true`,
 3. a `sha256` checksum is recorded in `acquisition`.
 
-Otherwise the build will stop with a message naming the missing condition.
+Otherwise the build will stop with a message naming each missing condition. `copy_between_own_machines` and `redistribute` are not part of this rule.
 
 ## Fetch and manual sources
 
 A `fetch` source has a `url` and a `sha256`. The pipeline will download the file and verify the checksum. Download and verification are not implemented yet.
 
-A `manual` source cannot be downloaded automatically, usually because the provider requires you to accept data use terms first. Its entry has an `instructions_url`, the expected `filename` and a `sha256`. Download the file from the instructions page, accept the terms, and keep it under exactly that filename. The pipeline will verify the checksum before using it. Where to place the file will be set when the download stage is implemented.
+A `manual` source cannot be downloaded automatically, usually because the provider requires you to accept data use terms first. Its entry has an `instructions_url`, the expected `filename` and a `sha256`. Download the file from the instructions page, accept the terms, and keep it under exactly that filename (a relative path). The pipeline will verify the checksum before using it.
+
+An entry holds one file and one checksum. Sources that are several files or a folder (`fsaverage`, `dk`, `dkt`, `brodmann-fs-ba`, and `aseg-fsaverage`, which comes from the fsaverage folder) name one file for now. Do not record a checksum for them until the manifest supports a list of files, which comes with the first build stage; one checksum would leave the other files unverified. Where to place the file will be set when the download stage is implemented.
 
 ## What the data guard rejects
 

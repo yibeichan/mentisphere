@@ -44,6 +44,7 @@ sources:
       instructions_url: https://balsa.wustl.edu/study/show/RVVG
       filename: "Q1-Q6_RelatedValidation210.CorticalAreas_dil_Final_Final_Areas_Group_Colors.32k_fs_LR.dlabel.nii"
       sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
   - key: fsaverage
     kind: surface
     name: "FreeSurfer fsaverage surfaces"
@@ -65,6 +66,7 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage"
       sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
   - key: dk
     kind: atlas
     name: "Desikan-Killiany (FreeSurfer aparc)"
@@ -86,6 +88,7 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage/label/lh.aparc.annot"
       sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
   - key: dkt
     kind: atlas
     name: "Desikan-Killiany-Tourville DKT40 (FreeSurfer)"
@@ -107,6 +110,7 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage/label/lh.aparc.DKTatlas.annot"
       sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
   - key: aseg-fsaverage
     kind: atlas
     name: "FreeSurfer aseg subcortical segmentation (fsaverage)"
@@ -128,6 +132,7 @@ sources:
       instructions_url: https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall
       filename: "subjects/fsaverage/mri/aseg.mgz"
       sha256: null
+  # Several files: leave sha256 null until the manifest supports a file list (docs/DATA.md).
   - key: brodmann-fs-ba
     kind: atlas
     name: "FreeSurfer Brodmann area labels (BA_exvivo, partial coverage)"

@@ -205,17 +205,21 @@ backend/
     models/
       region.py
 
+pipeline/
+  sources.yaml
+  src/mentisphere_pipeline/
+
 scripts/
-  data_pipeline/
-    convert_nifti_to_meshes.py
-    convert_surface_to_glb.py
-    validate_region_metadata.py
+  check_no_data_files.py
 
 data/
-  atlases/
-  meshes/
   metadata/
     regions.json
+```
+
+Atlas files, surfaces and built meshes are not in the repository; they live in `$MENTI_DATA` (see `docs/DATA.md`).
+
+```
 ```
 
 ## Naming

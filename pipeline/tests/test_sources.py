@@ -248,3 +248,143 @@ def test_cli_reports_buildable(tmp_path, capsys):
     good = write(tmp_path, source_yaml())
     assert main(["check-sources", str(good)]) == 0
     assert capsys.readouterr().out.strip() == "dkt: buildable"
+
+
+def replaced(old, new, **kwargs):
+    text = source_yaml(**kwargs)
+    assert old in text
+    return text.replace(old, new, 1)
+
+
+MANUAL = f"""
+    mode: manual
+    instructions_url: https://example.org/how
+    filename: file.nii.gz
+    sha256: {SHA}"""
+
+
+@pytest.mark.parametrize("flag", ["local_use", "copy_between_own_machines", "redistribute"])
+@pytest.mark.parametrize("value", ['"yes"', "yes", "on", "no", "1", '"true"', "0"])
+def test_non_boolean_flags_rejected(tmp_path, flag, value):
+    entry = replaced(f"{flag}: true", f"{flag}: {value}")
+    with pytest.raises(SourceError):
+        load_sources(write(tmp_path, entry))
+
+
+def test_http_instructions_url_rejected(tmp_path):
+    acq = MANUAL.replace("https://example.org/how", "http://example.org/how")
+    with pytest.raises(SourceError):
+        load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+@pytest.mark.parametrize("sha", ['"abc"', f'"{"A" * 64}"', f"|\n        {SHA}"])
+def test_malformed_manual_sha256_rejected(tmp_path, sha):
+    acq = MANUAL.replace(f"sha256: {SHA}", f"sha256: {sha}")
+    with pytest.raises(SourceError, match="sha256"):
+        load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+def test_sha256_with_trailing_newline_rejected(tmp_path):
+    acq = f"""
+    mode: fetch
+    url: https://example.org/file.nii.gz
+    sha256: |
+      {SHA}"""
+    with pytest.raises(SourceError, match="sha256"):
+        load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+def test_unvalidated_bad_sha256_not_buildable(tmp_path):
+    (src,) = load_sources(write(tmp_path, source_yaml()))
+    acq = src.acquisition.model_copy(update={"sha256": SHA + "\n"})
+    with pytest.raises(NotBuildable, match="sha256"):
+        assert_buildable(src.model_copy(update={"acquisition": acq}))
+
+
+@pytest.mark.parametrize(
+    "filename", ['"/etc/passwd"', '"../../x"', '""', '"a//b"', '"./a"', '"a\\\\b"']
+)
+def test_unsafe_manual_filename_rejected(tmp_path, filename):
+    acq = MANUAL.replace("filename: file.nii.gz", f"filename: {filename}")
+    with pytest.raises(SourceError, match="filename"):
+        load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+
+
+def test_nested_manual_filename_accepted(tmp_path):
+    acq = MANUAL.replace("filename: file.nii.gz", "filename: subjects/fsaverage/mri/aseg.mgz")
+    (src,) = load_sources(write(tmp_path, source_yaml(acquisition=acq)))
+    assert src.acquisition.filename == "subjects/fsaverage/mri/aseg.mgz"
+
+
+@pytest.mark.parametrize(
+    "old,new",
+    [
+        ("    kind: atlas\n", "    kind: atlas\n    colour: red\n"),
+        ("kind: atlas", "kind: mesh"),
+        ("space: fsaverage", "space: MNI305"),
+        ("      audited: 2026-11-16\n", ""),
+        ("name: Test atlas", 'name: " "'),
+        ("name: Test license", 'name: ""'),
+        ('version: "1"', 'version: ""'),
+        ("attribution: Credit the authors", 'attribution: ""'),
+        ("text: Author A (2020) Title. Journal 1:1-2", 'text: ""'),
+        ("doi: null", 'doi: "x"'),
+        ("doi: null", 'doi: "10.1/x"'),
+    ],
+)
+def test_malformed_entry_rejected(tmp_path, old, new):
+    with pytest.raises(SourceError):
+        load_sources(write(tmp_path, replaced(old, new)))
+
+
+def test_valid_doi_accepted(tmp_path):
+    entry = replaced("doi: null", 'doi: "10.1016/j.neuroimage.2012.01.021"')
+    (src,) = load_sources(write(tmp_path, entry))
+    assert src.citation.doi == "10.1016/j.neuroimage.2012.01.021"
+
+
+@pytest.mark.parametrize("audited", ["1763251200", '"2026-11-16"', "2026-11-16T00:00:00"])
+def test_audited_must_be_a_yaml_date(tmp_path, audited):
+    with pytest.raises(SourceError, match="audited"):
+        load_sources(write(tmp_path, source_yaml(audited=audited)))
+
+
+@pytest.mark.parametrize(
+    "text",
+    ["sources: 3\n", "sources: []\n", "- a\n", "sources:\n  - 1\n"],
+)
+def test_bad_top_level_rejected(tmp_path, text):
+    path = tmp_path / "sources.yaml"
+    path.write_text(text, encoding="utf-8")
+    with pytest.raises(SourceError):
+        load_sources(path)
+
+
+def test_extra_top_level_key_rejected(tmp_path):
+    path = write(tmp_path, source_yaml())
+    path.write_text(path.read_text(encoding="utf-8") + "notes: x\n", encoding="utf-8")
+    with pytest.raises(SourceError, match="top level"):
+        load_sources(path)
+
+
+def test_all_missing_conditions_reported(tmp_path):
+    acq = MANUAL.replace(f"sha256: {SHA}", "sha256: null")
+    entry = source_yaml(audited="null", local_use="null", acquisition=acq)
+    (src,) = load_sources(write(tmp_path, entry))
+    with pytest.raises(NotBuildable) as info:
+        assert_buildable(src)
+    assert str(info.value) == (
+        "license not audited; local use not allowed or unclear; no sha256 checksum"
+    )
+
+
+def test_cli_missing_file(tmp_path, capsys):
+    assert main(["check-sources", str(tmp_path / "absent.yaml")]) == 1
+    assert "error:" in capsys.readouterr().err
+
+
+def test_cli_invalid_yaml(tmp_path, capsys):
+    path = tmp_path / "sources.yaml"
+    path.write_text("sources: [\n", encoding="utf-8")
+    assert main(["check-sources", str(path)]) == 1
+    assert "invalid YAML" in capsys.readouterr().err

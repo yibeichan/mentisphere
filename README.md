@@ -121,7 +121,7 @@ GET /api/search?q=memory
 
 The current region metadata is a small educational starter set, not a complete anatomical atlas. Functional descriptions are deliberately conservative and should be treated as learning summaries, not medical advice.
 
-Atlas assets are not bundled. Each source has a license entry in `pipeline/sources.yaml`, and a source will be used only after its terms are audited and a checksum is recorded. Downloaded files and built meshes will live in `$MENTI_DATA`, outside git. See [docs/DATA.md](docs/DATA.md).
+Atlas assets are not bundled. Each source has a license entry in `pipeline/sources.yaml`, and a source will be used only when its license is audited, local use is allowed and a checksum is recorded. Downloaded files and built meshes will live in `$MENTI_DATA`, outside git. See [docs/DATA.md](docs/DATA.md).
 
 ## Status
 
