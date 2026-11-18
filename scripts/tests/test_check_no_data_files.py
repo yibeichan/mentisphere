@@ -188,3 +188,80 @@ def test_allowlist_cannot_exempt_compressed_content(tmp_path):
 def test_word_containing_ndar_is_not_an_id(tmp_path):
     rel = write(tmp_path, "w.tsx", b"<meshStandardMaterial />")
     assert find_violations([rel], tmp_path, set()) == []
+
+
+# Tokens are split so this file does not match the patterns it tests.
+NDAR_ID = "NDAR" + "INVAB123456"
+
+
+def rules(root, *rels, allow=frozenset()):
+    return [v.rule for v in find_violations(list(rels), root, set(allow))]
+
+
+@pytest.mark.parametrize("codec", ["utf-16", "utf-16-le", "utf-16-be", "utf-32"])
+def test_utf16_and_utf32_text_is_leak_scanned(tmp_path, codec):
+    rel = write(tmp_path, "ids.txt", ("subject " + NDAR_ID + "\n").encode(codec))
+    assert rules(tmp_path, rel) == ["leak"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "NDAR" + "-INVAB123456",
+        "NDAR" + " INVAB123456",
+        "cd /ho" + "me/alice",
+        "/ho" + "me/first.last/data",
+        "see /Us" + "ers/alice",
+        "root=/or" + "cd",
+        "mount /sc" + "ratch",
+    ],
+)
+def test_detects_leak_spellings(tmp_path, text):
+    rel = write(tmp_path, "c.txt", (text + "\n").encode())
+    assert rules(tmp_path, rel) == ["leak"]
+
+
+@pytest.mark.parametrize("text", ["the /" + "network folder", "/" + "orcdx/y", "/ho" + "me/ is empty"])
+def test_longer_names_are_not_leaks(tmp_path, text):
+    rel = write(tmp_path, "ok.txt", text.encode())
+    assert rules(tmp_path, rel) == []
+
+
+def test_lfs_pointer_rejected_even_if_allowlisted(tmp_path):
+    pointer = b"version https://git-lfs.github.com/spec/v1\noid sha256:" + b"0" * 64 + b"\nsize 3000938\n"
+    rel = write(tmp_path, "atlas.dat", pointer)
+    assert rules(tmp_path, rel, allow={rel}) == ["git-filter"]
+
+
+@pytest.mark.parametrize(
+    "line",
+    ["*.dat filter=lfs diff=lfs merge=lfs -text", "ids.txt working-tree-encoding=UTF-16LE"],
+)
+def test_gitattributes_filter_or_encoding_rejected(tmp_path, line):
+    rel = write(tmp_path, "sub/.gitattributes", (line + "\n").encode())
+    assert rules(tmp_path, rel, allow={rel}) == ["git-filter"]
+
+
+def test_gitattributes_without_filter_is_clean(tmp_path):
+    text = "# filter=lfs is not used here\n*.sh text eol=lf\n*.png binary\n"
+    rel = write(tmp_path, ".gitattributes", text.encode())
+    assert rules(tmp_path, rel) == []
+
+
+def test_missing_tracked_file_is_reported(tmp_path):
+    assert rules(tmp_path, "gone.txt") == ["unreadable"]
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="root can read any file")
+def test_unreadable_file_is_reported(tmp_path):
+    rel = write(tmp_path, "ids.txt", NDAR_ID.encode())
+    (tmp_path / rel).chmod(0)
+    try:
+        assert rules(tmp_path, rel) == ["unreadable"]
+    finally:
+        (tmp_path / rel).chmod(0o644)
+
+
+def test_guard_files_are_scanned_like_any_other(tmp_path):
+    rel = write(tmp_path, "scripts/tests/test_check_no_data_files.py", ("ID = '" + NDAR_ID + "'\n").encode())
+    assert rules(tmp_path, rel) == ["leak"]

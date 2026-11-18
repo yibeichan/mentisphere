@@ -64,7 +64,9 @@ An entry holds one file and one checksum. Sources that are several files or a fo
 - tracked symbolic links, whatever they point to,
 - files with a data, mesh or archive suffix (for example `.nii`, `.nii.gz`, `.gii`, `.mgz`, `.annot`, `.glb`, `.npy`, `.csv`, `.tsv`, `.gz`, `.zip`, `.bin`, `.pial`), compared case-insensitively against the full suffix, and files whose content starts with gzip or zip bytes under any name,
 - files larger than 1 MB,
-- file names and text that match a leak pattern: participant identifiers (`NDAR`, an optional underscore and eight letters or digits, in any case, not preceded by a letter), and absolute home or cluster paths such as home directories (`/home/<user>/`, `/Users/<user>/`) and root-level cluster mounts (`orcd`, `scratch`, `net`, `mnt`, `nfs`, `gpfs`, `lustre`). Text is decoded leniently, so a stray non-UTF-8 byte does not hide a match.
+- Git LFS pointers, and `.gitattributes` lines that set `filter=` or `working-tree-encoding=`, because the checked-out file would then differ from what git stores,
+- tracked files that are missing or cannot be read,
+- file names and text that match a leak pattern: participant identifiers (`NDAR`, an optional underscore, hyphen or space, and eight letters or digits, in any case, not preceded by a letter), and absolute home or cluster paths such as home directories (`/home/<user>`, `/Users/<user>`) and root-level cluster mounts (`orcd`, `scratch`, `net`, `mnt`, `nfs`, `gpfs`, `lustre`). Text is decoded leniently, so a stray non-UTF-8 byte does not hide a match, and text containing NUL bytes (UTF-16 or UTF-32) is scanned again with the NULs removed. The guard's own files are scanned too.
 
 Run it locally:
 
@@ -72,4 +74,4 @@ Run it locally:
 python3.12 scripts/check_no_data_files.py
 ```
 
-`scripts/data_guard_allow.txt` lists repo-relative paths that skip the size and leak checks. It cannot exempt a file from the symlink or data-suffix checks. Keep real data in `$MENTI_DATA`.
+`scripts/data_guard_allow.txt` lists repo-relative paths that skip the size and leak checks. It cannot exempt a file from any other check. Keep real data in `$MENTI_DATA`.

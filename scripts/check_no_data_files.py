@@ -2,18 +2,22 @@
 """Reject data files, oversized files and private strings in tracked files.
 
 Stdlib only. Lists tracked files with `git ls-files`, then flags:
-  symlink      a tracked symbolic link (never exempted by the allowlist)
-  data-suffix  a data or mesh file extension, or gzip/zip content under any
-               name (never exempted by the allowlist)
+  symlink      a tracked symbolic link
+  data-suffix  a data or mesh file extension, or gzip/zip content under any name
+  git-filter   a Git LFS pointer, or a .gitattributes line that sets `filter=`
+               or `working-tree-encoding=` (the checked-out file would then
+               differ from what git stores, so the other checks could not see it)
+  unreadable   a tracked file that is missing or cannot be read
   size         a file larger than MAX_BYTES
-  leak         a path or file content (decoded leniently) matching LEAK_PATTERNS
+  leak         a path or file content matching LEAK_PATTERNS; content is
+               decoded leniently, and text with NUL bytes (UTF-16, UTF-32) is
+               scanned again with the NULs removed
 
-Paths listed in scripts/data_guard_allow.txt skip the size and leak checks.
+Paths listed in scripts/data_guard_allow.txt skip the size and leak checks only.
 """
 from __future__ import annotations
 
 import argparse
-import os
 import re
 import subprocess
 import sys
@@ -30,37 +34,37 @@ DATA_SUFFIXES: tuple[str, ...] = (
     ".pial", ".white", ".inflated", ".sphere", ".ctab",
 )
 COMPRESSED_MAGIC: tuple[bytes, ...] = (b"\x1f\x8b", b"PK\x03\x04")
+LFS_POINTER = b"version https://git-lfs.github.com/spec/"
+ATTRIBUTE_RE = re.compile(r"(?<![\w-])(?:filter|working-tree-encoding)=")
 MAX_BYTES = 1_000_000
+# A mount name must end there: a folder called "network" is not the "net" mount.
+_END = r"(?![\w.-])"
 LEAK_PATTERNS: tuple[re.Pattern[str], ...] = tuple(
     re.compile(p, flags)
     for p, flags in (
-        (r"(?<![A-Za-z])NDAR_?[A-Z0-9]{8}", re.IGNORECASE),
-        (r"(?<![\w.~-])/(?:orcd|scratch|net|mnt|nfs|gpfs|lustre)/", 0),
-        (r"/home/[a-z][a-z0-9_-]*/", 0),
-        (r"/Users/[A-Za-z][^/]*/", 0),
+        (r"(?<![A-Za-z])NDAR[\s_-]?[A-Z0-9]{8}", re.IGNORECASE),
+        (r"(?<![\w.~-])/(?:orcd|scratch|net|mnt|nfs|gpfs|lustre)" + _END, 0),
+        (r"/home/[A-Za-z_][\w.-]*", 0),
+        (r"/Users/[A-Za-z][^/\s]*", 0),
     )
 )
-# These files contain the patterns themselves.
-SELF_EXCLUDED = frozenset(
-    {"scripts/check_no_data_files.py", "scripts/tests/test_check_no_data_files.py"}
-)
 ALLOW_FILE = Path("scripts/data_guard_allow.txt")
+
+Rule = Literal["symlink", "data-suffix", "git-filter", "unreadable", "size", "leak"]
 
 
 @dataclass(frozen=True)
 class Violation:
     path: str
-    rule: Literal["symlink", "data-suffix", "size", "leak"]
+    rule: Rule
     detail: str
 
 
-def _has_compressed_magic(file: Path) -> bool:
-    try:
-        with open(file, "rb") as f:
-            head = f.read(4)
-    except OSError:
-        return False
-    return head.startswith(COMPRESSED_MAGIC)
+def _texts(data: bytes) -> list[str]:
+    texts = [data.decode("utf-8", errors="replace")]
+    if b"\0" in data:
+        texts.append(data.replace(b"\0", b"").decode("utf-8", errors="replace"))
+    return texts
 
 
 def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[Violation]:
@@ -71,34 +75,44 @@ def find_violations(paths: Iterable[str], root: Path, allow: set[str]) -> list[V
             found.append(Violation(rel, "symlink", "tracked symbolic link"))
             continue
         lower = rel.lower()
-        suffix_hit = False
         for suffix in DATA_SUFFIXES:
             if lower.endswith(suffix):
                 found.append(Violation(rel, "data-suffix", f"data file extension {suffix}"))
-                suffix_hit = True
                 break
-        if not suffix_hit and _has_compressed_magic(file):
+        if file.is_dir():
+            # A submodule; its files live in another repository.
+            continue
+        try:
+            size = file.stat().st_size
+            with open(file, "rb") as f:
+                data = f.read(MAX_BYTES + 1)
+        except OSError as exc:
+            found.append(Violation(rel, "unreadable", f"cannot read ({type(exc).__name__})"))
+            continue
+        if not any(v.path == rel and v.rule == "data-suffix" for v in found) and data.startswith(
+            COMPRESSED_MAGIC
+        ):
             found.append(Violation(rel, "data-suffix", "compressed content"))
+        if data.startswith(LFS_POINTER):
+            found.append(Violation(rel, "git-filter", "Git LFS pointer"))
+        if Path(rel).name == ".gitattributes":
+            for line in data.decode("utf-8", errors="replace").splitlines():
+                if not line.lstrip().startswith("#") and ATTRIBUTE_RE.search(line):
+                    found.append(
+                        Violation(rel, "git-filter", "sets filter= or working-tree-encoding=")
+                    )
+                    break
         if rel in allow:
             continue
         for pattern in LEAK_PATTERNS:
             if pattern.search(rel):
                 found.append(Violation(rel, "leak", f"matches {pattern.pattern} in path"))
-        try:
-            size = file.stat().st_size
-        except OSError:
-            continue
         if size > MAX_BYTES:
             found.append(Violation(rel, "size", f"{size} bytes exceeds {MAX_BYTES}"))
             continue
-        if rel in SELF_EXCLUDED or not file.is_file():
-            continue
-        try:
-            text = file.read_bytes().decode("utf-8", errors="replace")
-        except OSError:
-            continue
+        texts = _texts(data)
         for pattern in LEAK_PATTERNS:
-            if pattern.search(text):
+            if any(pattern.search(text) for text in texts):
                 found.append(Violation(rel, "leak", f"matches {pattern.pattern}"))
     return found
 
