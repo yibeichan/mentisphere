@@ -10,7 +10,7 @@ sources:
     license:
       name: "WU-Minn HCP Open Access Data Use Terms"
       url: https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
-      local_use: null
+      local_use: true
       copy_between_own_machines: null
       redistribute: true
       attribution: "Acknowledge WU-Minn HCP data per Data Use Term 5"
@@ -31,7 +31,7 @@ sources:
     license:
       name: "WU-Minn HCP Open Access Data Use Terms"
       url: https://www.humanconnectome.org/study/hcp-young-adult/document/wu-minn-hcp-consortium-open-access-data-use-terms
-      local_use: null
+      local_use: true
       copy_between_own_machines: null
       redistribute: true
       attribution: "Acknowledge WU-Minn HCP data; cite Glasser 2016"
@@ -52,7 +52,7 @@ sources:
     license:
       name: "FreeSurfer Software License"
       url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
-      local_use: null
+      local_use: true
       copy_between_own_machines: true
       redistribute: true
       attribution: "Include the FreeSurfer license text with copies"
@@ -73,7 +73,7 @@ sources:
     license:
       name: "FreeSurfer Software License"
       url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
-      local_use: null
+      local_use: true
       copy_between_own_machines: true
       redistribute: true
       attribution: "Include the FreeSurfer license text; cite Desikan 2006"
@@ -94,7 +94,7 @@ sources:
     license:
       name: "FreeSurfer Software License"
       url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
-      local_use: null
+      local_use: true
       copy_between_own_machines: true
       redistribute: true
       attribution: "Include the FreeSurfer license text; cite Klein and Tourville 2012"
@@ -115,7 +115,7 @@ sources:
     license:
       name: "FreeSurfer Software License"
       url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
-      local_use: null
+      local_use: true
       copy_between_own_machines: true
       redistribute: true
       attribution: "Include the FreeSurfer license text"
@@ -136,7 +136,7 @@ sources:
     license:
       name: "FreeSurfer Software License"
       url: https://surfer.nmr.mgh.harvard.edu/fswiki/FreeSurferSoftwareLicense
-      local_use: null
+      local_use: true
       copy_between_own_machines: true
       redistribute: null
       attribution: "Include the FreeSurfer license text; wiki notes no commercial use"
